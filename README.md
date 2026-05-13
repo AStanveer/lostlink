@@ -50,12 +50,3 @@ See [`frontend/README.md`](frontend/README.md) and [`backend/README.md`](backend
 
 ---
 
-## Project Timeline
-
-| Week | Task |
-|------|------|
-| Week 1 (26 Apr – 2 May) | Proposal and system design |
-| Week 2–3 (3–16 May) | Frontend development |
-| Week 3–4 (17–30 May) | Backend API development |
-| Week 5–6 (31 May – 13 Jun) | Database integration |
-| Week 7 (14–20 Jun) | Testing and debugging |
