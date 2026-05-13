@@ -4,14 +4,6 @@ A centralized campus lost and found platform built with Vue.js, PHP Slim, and My
 
 **WEB TECHNOLOGY (SECJ3483) | SEM 2 2025/2026 | Section 01**
 
-| Name | Matric | Role |
-|------|--------|------|
-| Anjum Siddiqua Tanveer Siddiqui | A23CS0289 | Frontend Developer |
-| Chuah Hui Wen | A23CS0219 | Backend Developer |
-| Thang Wei Jie | A23CS0280 | Database Developer |
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
