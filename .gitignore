@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+frontend/dist/
+
+# Environment files
+.env
+.env.local
+backend/.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+
+# Logs
+*.log
+npm-debug.log*
+
+# PHP
+*.cache

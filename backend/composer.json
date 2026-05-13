@@ -1,0 +1,16 @@
+{
+  "name": "lostlink/backend",
+  "description": "LostLink REST API — PHP Slim Framework",
+  "require": {
+    "php": "^8.1",
+    "slim/slim": "^4.12",
+    "slim/psr7": "^1.6",
+    "firebase/php-jwt": "^6.9",
+    "vlucas/phpdotenv": "^5.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  }
+}
