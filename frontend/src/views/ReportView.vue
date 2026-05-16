@@ -207,8 +207,6 @@ function toBase64(file) {
   })
 }
 
-const GV_KEY = 'AIzaSyCjUMSPmHuYBzbz61ZyIxK3l3pbRCylgoI'
-
 function rgbToColorName(r, g, b) {
   // Convert to HSL for more perceptual accuracy
   const rn = r / 255, gn = g / 255, bn = b / 255
