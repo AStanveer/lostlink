@@ -5,7 +5,8 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/HomeView.vue')
+    component: () => import('@/views/HomeView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/login',
@@ -33,6 +34,7 @@ const routes = [
     path: '/report',
     name: 'Report',
     component: () => import('@/views/ReportView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/matches',

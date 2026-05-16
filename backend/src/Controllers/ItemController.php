@@ -57,7 +57,6 @@ class ItemController
         }
 
         $user = $request->getAttribute('user');
-        $postedBy = $user ? $user->sub : 1;
 
         $db = Database::connect();
         $db->prepare(
@@ -71,7 +70,7 @@ class ItemController
             $data['date'],
             $data['report_type'],
             'active',
-            $postedBy,
+            $user->sub,
         ]);
 
         $id = $db->lastInsertId();
