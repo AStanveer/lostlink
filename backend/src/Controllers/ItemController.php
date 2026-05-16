@@ -46,7 +46,6 @@ class ItemController
 
     public function create(Request $request, Response $response): Response
     {
-        $user = $request->getAttribute('user');
         $data = $request->getParsedBody();
 
         $required = ['title', 'description', 'category', 'location', 'date', 'report_type'];
@@ -56,6 +55,9 @@ class ItemController
                 return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
             }
         }
+
+        $user = $request->getAttribute('user');
+        $postedBy = $user ? $user->sub : 1;
 
         $db = Database::connect();
         $db->prepare(
@@ -69,7 +71,7 @@ class ItemController
             $data['date'],
             $data['report_type'],
             'active',
-            $user->sub,
+            $postedBy,
         ]);
 
         $id = $db->lastInsertId();

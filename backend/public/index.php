@@ -28,9 +28,16 @@ $app->add(function ($request, $handler) {
 $app->post('/register', \App\Controllers\AuthController::class . ':register');
 $app->post('/login',    \App\Controllers\AuthController::class . ':login');
 
+// Public item routes (no login required)
+$app->get('/items',  \App\Controllers\ItemController::class . ':index');
+$app->post('/items', \App\Controllers\ItemController::class . ':create');
+
+// OPTIONS preflight for CORS
+$app->options('/{routes:.+}', function ($request, $response) {
+    return $response;
+});
+
 $app->group('', function (RouteCollectorProxy $group) {
-    $group->get('/items',          \App\Controllers\ItemController::class . ':index');
-    $group->post('/items',         \App\Controllers\ItemController::class . ':create');
     $group->put('/items/{id}',     \App\Controllers\ItemController::class . ':update');
     $group->delete('/items/{id}',  \App\Controllers\ItemController::class . ':delete');
 

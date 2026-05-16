@@ -33,7 +33,6 @@ const routes = [
     path: '/report',
     name: 'Report',
     component: () => import('@/views/ReportView.vue'),
-    meta: { requiresAuth: true }
   },
   {
     path: '/matches',
