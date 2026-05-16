@@ -26,7 +26,7 @@ $app->add(function ($request, $handler) {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 });
 
-// Routes
+// Public routes
 $app->post('/register', \App\Controllers\AuthController::class . ':register');
 $app->post('/login',    \App\Controllers\AuthController::class . ':login');
 
@@ -35,17 +35,30 @@ $app->options('/{routes:.+}', function ($request, $response) {
     return $response;
 });
 
+// Public item browse
 $app->get('/items', \App\Controllers\ItemController::class . ':index');
+$app->get('/items/{id}', \App\Controllers\ItemController::class . ':show');
 $app->post('/analyze', \App\Controllers\AnalyzeController::class . ':analyze');
 
+// Protected routes (JWT required)
 $app->group('', function (RouteCollectorProxy $group) {
-    $group->post('/items',         \App\Controllers\ItemController::class . ':create');
-    $group->put('/items/{id}',     \App\Controllers\ItemController::class . ':update');
-    $group->delete('/items/{id}',  \App\Controllers\ItemController::class . ':delete');
+    // Items
+    $group->post('/items',        \App\Controllers\ItemController::class . ':create');
+    $group->put('/items/{id}',    \App\Controllers\ItemController::class . ':update');
+    $group->delete('/items/{id}', \App\Controllers\ItemController::class . ':delete');
 
-    $group->post('/claims',        \App\Controllers\ClaimController::class . ':create');
-    $group->get('/matches',        \App\Controllers\MatchController::class . ':index');
+    // Claims
+    $group->post('/claims',                    \App\Controllers\ClaimController::class . ':create');
+    $group->get('/claims/item/{itemId}',       \App\Controllers\ClaimController::class . ':getByItem');
+    $group->put('/claims/{id}',                \App\Controllers\ClaimController::class . ':updateStatus');
+    $group->post('/claims/{id}/received', \App\Controllers\ClaimController::class . ':markReceived');
+
+    // Matches
+    $group->get('/matches', \App\Controllers\MatchController::class . ':index');
+
+    // Dashboard
     $group->get('/dashboard/{userId}', \App\Controllers\DashboardController::class . ':index');
+    
 })->add(\App\Middleware\JwtMiddleware::class);
 
 $app->run();
