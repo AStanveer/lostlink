@@ -192,10 +192,8 @@ const canClaim  = computed(() =>
 
 onMounted(async () => {
   try {
-    const res = await api.get(`/items?id=${route.params.id}`)
-    // Backend returns array from /items; fetch by id if available, else filter
-    const all = res.data
-    item.value = all.find(i => i.item_id == route.params.id) || null
+    const res = await api.get(`/items/${route.params.id}`)
+    item.value = res.data
   } catch (e) {
     item.value = null
   } finally {

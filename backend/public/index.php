@@ -37,6 +37,7 @@ $app->options('/{routes:.+}', function ($request, $response) {
 
 // Public item browse
 $app->get('/items', \App\Controllers\ItemController::class . ':index');
+$app->get('/items/{id}', \App\Controllers\ItemController::class . ':show');
 $app->post('/analyze', \App\Controllers\AnalyzeController::class . ':analyze');
 
 // Protected routes (JWT required)

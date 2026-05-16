@@ -44,6 +44,22 @@ class ItemController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public function show(Request $request, Response $response, array $args): Response
+    {
+        $db   = Database::connect();
+        $stmt = $db->prepare('SELECT * FROM items WHERE item_id = ?');
+        $stmt->execute([(int) $args['id']]);
+        $item = $stmt->fetch();
+
+        if (!$item) {
+            $response->getBody()->write(json_encode(['error' => 'Item not found']));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        }
+
+        $response->getBody()->write(json_encode($item));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public function create(Request $request, Response $response): Response
     {
         $data = $request->getParsedBody();
