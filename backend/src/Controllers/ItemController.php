@@ -58,10 +58,22 @@ class ItemController
 
         $user = $request->getAttribute('user');
 
+        $imagePath = null;
+        if (!empty($data['image'])) {
+            $uploadsDir = __DIR__ . '/../../public/uploads/';
+            if (!is_dir($uploadsDir)) {
+                mkdir($uploadsDir, 0755, true);
+            }
+            $imageBytes = base64_decode($data['image']);
+            $filename   = uniqid('item_', true) . '.jpg';
+            file_put_contents($uploadsDir . $filename, $imageBytes);
+            $imagePath = '/uploads/' . $filename;
+        }
+
         $db = Database::connect();
         $db->prepare(
-            'INSERT INTO items (title, description, category, location, date, report_type, status, posted_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO items (title, description, category, location, date, report_type, status, image_path, posted_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         )->execute([
             $data['title'],
             $data['description'],
@@ -70,6 +82,7 @@ class ItemController
             $data['date'],
             $data['report_type'],
             'active',
+            $imagePath,
             $user->sub,
         ]);
 

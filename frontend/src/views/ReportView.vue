@@ -16,35 +16,30 @@
 
       <form @submit.prevent="handleSubmit" class="report-form">
 
-        <!-- Photo upload — AI mode only -->
-        <div v-if="mode === 'ai'" class="form-group">
+        <!-- Photo upload -->
+        <div class="form-group">
           <label>
             Photo
-            <span class="vision-badge">✨ AI Auto-fill</span>
+            <span v-if="mode === 'ai'" class="vision-badge">✨ AI Auto-fill</span>
           </label>
+          <!-- Hidden inputs — always in DOM so refs are never null -->
+          <input ref="fileInput"   type="file" accept="image/*"                         style="display:none" @change="handleFileChange" />
+          <input ref="cameraInput" type="file" accept="image/*" capture="environment"   style="display:none" @change="handleFileChange" />
+
           <!-- Preview (shown after photo selected) -->
           <div v-if="previewUrl" class="photo-upload has-file" @click="fileInput.click()">
             <img :src="previewUrl" class="photo-preview" alt="preview" />
-            <input ref="fileInput" type="file" accept="image/*" @change="handleFileChange" />
-            <input ref="cameraInput" type="file" accept="image/*" capture="environment" @change="handleFileChange" />
           </div>
 
           <!-- Upload / Camera buttons (shown before photo selected) -->
           <div v-else class="photo-options">
-            <div
-              class="photo-upload"
-              @click="fileInput.click()"
-              @dragover.prevent
-              @drop.prevent="handleDrop"
-            >
+            <div class="photo-upload" @click="fileInput.click()" @dragover.prevent @drop.prevent="handleDrop">
               <span class="camera-icon">🖼️</span>
               <p>Click or drag to upload</p>
-              <input ref="fileInput" type="file" accept="image/*" @change="handleFileChange" />
             </div>
-            <div class="photo-upload" @click="cameraInput.click()">
+            <div class="photo-upload" @click="openCamera">
               <span class="camera-icon">📷</span>
               <p>Take a photo</p>
-              <input ref="cameraInput" type="file" accept="image/*" capture="environment" @change="handleFileChange" />
             </div>
           </div>
 
@@ -132,12 +127,24 @@
         </div>
 
       </form>
+
+      <!-- Camera modal -->
+      <div v-if="cameraOpen" class="camera-modal">
+        <div class="camera-modal-inner">
+          <video ref="videoEl" autoplay playsinline class="camera-video"></video>
+          <canvas ref="canvasEl" style="display:none"></canvas>
+          <div class="camera-actions">
+            <button type="button" class="btn-capture" @click="capturePhoto">📷 Capture</button>
+            <button type="button" class="btn-cancel-cam" @click="closeCamera">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
@@ -156,7 +163,12 @@ const mode = ref('ai')
 
 const fileInput = ref(null)
 const cameraInput = ref(null)
+const videoEl = ref(null)
+const canvasEl = ref(null)
+const cameraOpen = ref(false)
+let mediaStream = null
 const previewUrl = ref(null)
+const imageData = ref(null)
 const analyzing = ref(false)
 const visionDone = ref(false)
 const submitting = ref(false)
@@ -281,15 +293,16 @@ async function analyzeWithGoogleVision(file) {
 async function processFile(file) {
   if (!file || !file.type.startsWith('image/')) return
   previewUrl.value = URL.createObjectURL(file)
+  imageData.value = await toBase64(file)
   visionDone.value = false
+
+  if (mode.value !== 'ai') return
+
   analyzing.value = true
-
   try {
-    const { topObject, allLabels, colors } = await analyzeWithGoogleVision(file)
+    const { topObject, allLabels } = await analyzeWithGoogleVision(file)
 
-    if (topObject) {
-      form.value.title = topObject
-    }
+    if (topObject) form.value.title = topObject
     if (allLabels.length) {
       form.value.description = allLabels.slice(0, 6).join(', ')
       form.value.category = detectCategory(allLabels)
@@ -297,10 +310,47 @@ async function processFile(file) {
     visionDone.value = true
   } catch (e) {
     console.error('Vision error:', e)
-    visionDone.value = false
     error.value = e.message || 'Image analysis failed. Fill in the fields manually.'
   } finally {
     analyzing.value = false
+  }
+}
+
+async function openCamera() {
+  cameraOpen.value = true
+  await nextTick()
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    videoEl.value.srcObject = mediaStream
+  } catch {
+    cameraOpen.value = false
+    error.value = 'Camera access denied. Please allow camera permissions.'
+  }
+}
+
+function closeCamera() {
+  cameraOpen.value = false
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop())
+    mediaStream = null
+  }
+}
+
+function capturePhoto() {
+  const video = videoEl.value
+  const canvas = canvasEl.value
+  canvas.width = video.videoWidth
+  canvas.height = video.videoHeight
+  canvas.getContext('2d').drawImage(video, 0, 0)
+  const dataUrl = canvas.toDataURL('image/jpeg')
+  previewUrl.value = dataUrl
+  imageData.value = dataUrl.split(',')[1]
+  closeCamera()
+
+  if (mode.value === 'ai') {
+    canvas.toBlob(blob => {
+      processFile(new File([blob], 'camera.jpg', { type: 'image/jpeg' }))
+    }, 'image/jpeg')
   }
 }
 
@@ -318,7 +368,7 @@ async function handleSubmit() {
   error.value = ''
   submitting.value = true
   try {
-    await api.post('/items', form.value)
+    await api.post('/items', { ...form.value, image: imageData.value })
     success.value = true
     setTimeout(() => router.push('/'), 2000)
   } catch (err) {
@@ -549,6 +599,60 @@ async function handleSubmit() {
   color: var(--primary);
   outline: 2px solid var(--primary);
   outline-offset: -2px;
+}
+
+/* ── Camera Modal ─────────────────────────────────── */
+.camera-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.camera-modal-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #1a1a1a;
+  border-radius: 12px;
+  width: min(480px, 95vw);
+}
+
+.camera-video {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+.camera-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-capture {
+  padding: 0.75rem 2rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel-cam {
+  padding: 0.75rem 2rem;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 /* ── Success / Error ──────────────────────────────── */
