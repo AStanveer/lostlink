@@ -162,6 +162,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import api from '@/services/api'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const auth = useAuthStore()
 const activeTab = ref('reports')
@@ -202,6 +204,11 @@ onMounted(async () => {
 async function fetchDashboard() {
   loading.value = true
   try {
+    if (!auth.user?.id) {
+      showToast('Session expired, please login again', 'error')
+      router.push('/login')
+      return
+    }
     const res = await api.get(`/dashboard/${auth.user.id}`)
     reports.value = res.data.reports
     claims.value  = res.data.claims

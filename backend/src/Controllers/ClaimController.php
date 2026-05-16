@@ -139,16 +139,52 @@ class ClaimController
            ->execute([$newStatus, $claimId]);
 
         // If approved, mark item as claimed and reject all other pending claims
+        // If approved, reject all other pending claims on the same item
         if ($newStatus === 'approved') {
-            $db->prepare('UPDATE items SET status = ? WHERE item_id = ?')
-               ->execute(['claimed', $row['item_id']]);
-
             $db->prepare(
                 'UPDATE claim_requests SET status = ? WHERE item_id = ? AND request_id != ? AND status = ?'
             )->execute(['rejected', $row['item_id'], $claimId, 'pending']);
         }
 
         $response->getBody()->write(json_encode(['message' => 'Claim ' . $newStatus]));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    // POST /claims/{id}/received — claimant confirms they got the item
+    public function markReceived(Request $request, Response $response, array $args): Response
+    {
+        $user    = $request->getAttribute('user');
+        $claimId = (int) $args['id'];
+
+        $db   = Database::connect();
+        $stmt = $db->prepare('SELECT * FROM claim_requests WHERE request_id = ?');
+        $stmt->execute([$claimId]);
+        $claim = $stmt->fetch();
+
+        if (!$claim) {
+            $response->getBody()->write(json_encode(['error' => 'Claim not found']));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        }
+
+        if ($claim['claimed_by'] !== $user->sub) {
+            $response->getBody()->write(json_encode(['error' => 'Forbidden']));
+            return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
+        }
+
+        if ($claim['status'] !== 'approved') {
+            $response->getBody()->write(json_encode(['error' => 'Claim is not approved yet']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
+
+        // Mark item as claimed
+        $db->prepare('UPDATE items SET status = ? WHERE item_id = ?')
+        ->execute(['claimed', $claim['item_id']]);
+
+        // Update claim status to received
+        $db->prepare('UPDATE claim_requests SET status = ? WHERE request_id = ?')
+        ->execute(['received', $claimId]);
+
+        $response->getBody()->write(json_encode(['message' => 'Item marked as received']));
         return $response->withHeader('Content-Type', 'application/json');
     }
 }

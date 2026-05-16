@@ -14,7 +14,7 @@ class DashboardController
         $user   = $request->getAttribute('user');
         $userId = (int) $args['userId'];
 
-        if ($user->sub !== $userId) {
+        if ($user->sub !== (int) $userId) {
             $response->getBody()->write(json_encode(['error' => 'Forbidden']));
             return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
         }

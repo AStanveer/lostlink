@@ -51,12 +51,14 @@ $app->group('', function (RouteCollectorProxy $group) {
     $group->post('/claims',                    \App\Controllers\ClaimController::class . ':create');
     $group->get('/claims/item/{itemId}',       \App\Controllers\ClaimController::class . ':getByItem');
     $group->put('/claims/{id}',                \App\Controllers\ClaimController::class . ':updateStatus');
+    $group->post('/claims/{id}/received', \App\Controllers\ClaimController::class . ':markReceived');
 
     // Matches
     $group->get('/matches', \App\Controllers\MatchController::class . ':index');
 
     // Dashboard
     $group->get('/dashboard/{userId}', \App\Controllers\DashboardController::class . ':index');
+    
 })->add(\App\Middleware\JwtMiddleware::class);
 
 $app->run();

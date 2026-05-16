@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS claim_requests (
     claimed_by  INT  NOT NULL,
     description TEXT NOT NULL,
     proof       BLOB DEFAULT NULL,
-    status      ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    status ENUM('pending', 'approved', 'rejected', 'received') NOT NULL DEFAULT 'pending'
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (request_id),
     CONSTRAINT fk_claim_item FOREIGN KEY (item_id)    REFERENCES items (item_id) ON DELETE CASCADE,
