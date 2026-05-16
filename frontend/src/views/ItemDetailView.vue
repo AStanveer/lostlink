@@ -110,7 +110,7 @@
 
           <form class="claim-form" @submit.prevent="submitClaim">
             <div class="form-group">
-              <label>Why do you own this item? *</label>
+              <label>Provide specific details only the true owner would know *</label>
               <textarea
                 v-model="claimForm.description"
                 rows="4"
