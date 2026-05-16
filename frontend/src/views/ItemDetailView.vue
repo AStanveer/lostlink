@@ -182,6 +182,7 @@ const toast        = ref({ message: '', type: '' })
 
 const claimForm = ref({ description: '' })
 
+
 const isOwnItem = computed(() => auth.user?.id === item.value?.posted_by)
 const canClaim  = computed(() =>
   auth.isLoggedIn &&
@@ -189,6 +190,7 @@ const canClaim  = computed(() =>
   item.value?.report_type === 'found' &&
   item.value?.status === 'active'
 )
+const lostItemId = computed(() => route.query.lost_item_id || null)
 
 onMounted(async () => {
   try {
@@ -229,9 +231,10 @@ async function submitClaim() {
   submitting.value = true
   try {
     await api.post('/claims', {
-      item_id:     item.value.item_id,
-      description: claimForm.value.description,
-      proof:       proofBase64.value || undefined,
+      item_id:      item.value.item_id,
+      description:  claimForm.value.description,
+      proof:        proofBase64.value || undefined,
+      lost_item_id: lostItemId.value || undefined,
     })
     claimSuccess.value = 'Claim submitted successfully. The item owner will review your request.'
     showToast('Claim submitted successfully', 'success')

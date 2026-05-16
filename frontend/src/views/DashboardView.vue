@@ -99,6 +99,7 @@
             <th>Item</th>
             <th>Submitted</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -106,6 +107,15 @@
             <td>{{ claim.item_title }}</td>
             <td>{{ formatDate(claim.created_at) }}</td>
             <td><span class="badge" :class="claim.status">{{ claim.status }}</span></td>
+            <td>
+              <button
+                v-if="claim.status === 'approved'"
+                class="btn btn-primary btn-sm"
+                @click="markReceived(claim.request_id)"
+              >
+                Mark as Received
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -148,7 +158,7 @@
 
           <!-- Action -->
           <RouterLink
-            :to="`/items/${match.found_item.item_id}`"
+            :to="`/items/${match.found_item.item_id}?lost_item_id=${match.lost_item.item_id}`"
             class="btn btn-outline view-claim-btn"
           >
             View &amp; Claim
@@ -163,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import api from '@/services/api'
 import { useRouter } from 'vue-router'
@@ -187,6 +197,9 @@ const tabs = [
   { key: 'claims',  label: 'My Claims'  },
   { key: 'matches', label: 'Matches'    },
 ]
+watch(activeTab, async (newTab) => {
+  if (newTab === 'reports') await fetchDashboard()
+})
 
 // Count pending claims across all found items user has posted
 const pendingClaimsCount = computed(() => {
@@ -267,6 +280,16 @@ async function respondClaim(claimId, status) {
   }
 }
 
+async function markReceived(claimId) {
+  try {
+    await api.post(`/claims/${claimId}/received`)
+    showToast('Item marked as received', 'success')
+    await fetchDashboard()
+  } catch (e) {
+    showToast('Failed to update', 'error')
+  }
+}
+
 function formatDate(d) {
   return d ? new Date(d).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 }
@@ -275,6 +298,7 @@ function showToast(message, type = 'success') {
   toast.value = { message, type }
   setTimeout(() => { toast.value = { message: '', type: '' } }, 3000)
 }
+
 </script>
 
 <style scoped>

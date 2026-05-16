@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS claim_requests (
     request_id  INT  NOT NULL AUTO_INCREMENT,
     item_id     INT  NOT NULL,
     claimed_by  INT  NOT NULL,
+    lost_item_id INT DEFAULT NULL,
     description TEXT NOT NULL,
     proof_path  VARCHAR(500) DEFAULT NULL,
     status ENUM('pending', 'approved', 'rejected', 'received') NOT NULL DEFAULT 'pending',

@@ -49,12 +49,13 @@ class ClaimController
         }
 
         $db->prepare(
-            'INSERT INTO claim_requests (item_id, claimed_by, description, proof_path, status) VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO claim_requests (item_id, claimed_by, description, proof_path, lost_item_id, status) VALUES (?, ?, ?, ?, ?, ?)'
         )->execute([
             (int) $data['item_id'],
             $user->sub,
             $data['description'],
             $proofPath,
+            !empty($data['lost_item_id']) ? (int) $data['lost_item_id'] : null,
             'pending',
         ]);
 
@@ -95,7 +96,7 @@ class ClaimController
         $stmt->execute([$itemId]);
 
         $claims = $stmt->fetchAll();
-        
+
         $response->getBody()->write(json_encode($claims));
         return $response->withHeader('Content-Type', 'application/json');
     }
@@ -177,9 +178,15 @@ class ClaimController
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
-        // Mark item as claimed
+        // Mark the found item as claimed
         $db->prepare('UPDATE items SET status = ? WHERE item_id = ?')
         ->execute(['claimed', $claim['item_id']]);
+
+        // Mark the linked lost item as claimed if provided
+        if (!empty($claim['lost_item_id'])) {
+            $db->prepare('UPDATE items SET status = ? WHERE item_id = ? AND posted_by = ?')
+            ->execute(['claimed', $claim['lost_item_id'], $user->sub]);
+        }
 
         // Update claim status to received
         $db->prepare('UPDATE claim_requests SET status = ? WHERE request_id = ?')
