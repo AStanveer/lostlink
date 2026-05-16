@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
@@ -34,6 +36,7 @@ $app->options('/{routes:.+}', function ($request, $response) {
 });
 
 $app->get('/items', \App\Controllers\ItemController::class . ':index');
+$app->post('/analyze', \App\Controllers\AnalyzeController::class . ':analyze');
 
 $app->group('', function (RouteCollectorProxy $group) {
     $group->post('/items',         \App\Controllers\ItemController::class . ':create');
