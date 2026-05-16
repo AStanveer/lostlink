@@ -65,6 +65,10 @@
                 <div class="claim-info">
                   <p class="claimant">✉️ {{ claim.claimant_email }}</p>
                   <p class="claim-desc">{{ claim.description }}</p>
+                  <div v-if="claim.proof_path" class="proof-img-wrap">
+                    <p class="proof-label">Proof submitted:</p>
+                    <img :src="`/api${claim.proof_path}`" class="proof-img" alt="Proof" />
+                  </div>
                   <p class="claim-date">Submitted {{ formatDate(claim.created_at) }}</p>
                 </div>
                 <div class="claim-status-badge">
@@ -378,6 +382,11 @@ function showToast(message, type = 'success') {
 .claims-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 .claims-table th { text-align: left; font-size: 0.8rem; color: #999; font-weight: 600; text-transform: uppercase; padding: 0.5rem 0.75rem; border-bottom: 1px solid #eee; }
 .claims-table td { padding: 0.85rem 0.75rem; border-bottom: 1px solid #f0f0f0; font-size: 0.92rem; color: #1a1a1a; }
+
+/* Proof image */
+.proof-img-wrap { margin-top: 0.5rem; }
+.proof-label { font-size: 0.78rem; color: #999; margin-bottom: 0.25rem; }
+.proof-img { max-height: 120px; border-radius: 6px; border: 1px solid #eee; }
 
 /* Match cards */
 .match-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }

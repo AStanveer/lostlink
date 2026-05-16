@@ -36,19 +36,25 @@ class ClaimController
             return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
         }
 
-        // Handle optional proof image (base64)
-        $proofData = null;
+        $proofPath = null;
         if (!empty($data['proof'])) {
-            $proofData = base64_decode($data['proof']);
+            $uploadsDir = __DIR__ . '/../../public/uploads/';
+            if (!is_dir($uploadsDir)) {
+                mkdir($uploadsDir, 0755, true);
+            }
+            $imageBytes = base64_decode($data['proof']);
+            $filename   = uniqid('proof_', true) . '.jpg';
+            file_put_contents($uploadsDir . $filename, $imageBytes);
+            $proofPath  = '/uploads/' . $filename;
         }
 
         $db->prepare(
-            'INSERT INTO claim_requests (item_id, claimed_by, description, proof, status) VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO claim_requests (item_id, claimed_by, description, proof_path, status) VALUES (?, ?, ?, ?, ?)'
         )->execute([
             (int) $data['item_id'],
             $user->sub,
             $data['description'],
-            $proofData,
+            $proofPath,
             'pending',
         ]);
 
@@ -89,12 +95,7 @@ class ClaimController
         $stmt->execute([$itemId]);
 
         $claims = $stmt->fetchAll();
-
-        // Strip binary proof from listing — too heavy; served separately if needed
-        foreach ($claims as &$c) {
-            unset($c['proof']);
-        }
-
+        
         $response->getBody()->write(json_encode($claims));
         return $response->withHeader('Content-Type', 'application/json');
     }
