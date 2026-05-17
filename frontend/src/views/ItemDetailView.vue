@@ -18,7 +18,7 @@
         <!-- Left: image + info -->
         <div class="detail-main">
           <div class="item-image">
-            <img v-if="item.image_path" :src="`/api${item.image_path}`" :alt="item.title" />
+            <img v-if="item.image_path" :src="`/api${item.image_path}`" :alt="item.title"/>
             <div v-else class="image-placeholder">📦</div>
           </div>
 
@@ -51,10 +51,10 @@
         <!-- Right: action card -->
         <div class="action-card">
           <p class="posted-by-label">Posted by</p>
-          <p class="posted-by-email">{{ item.poster_email || 'Campus user' }}</p>
+          <p class="posted-by-email">{{ item.posted_by || 'Campus user' }}</p>
           <p class="posted-date">{{ formatDate(item.date) }}</p>
 
-          <hr class="divider" />
+          <hr class="divider"/>
 
           <!-- Can claim if: item is found by someone else and still active -->
           <div v-if="canClaim">
@@ -112,10 +112,10 @@
             <div class="form-group">
               <label>Provide specific details only the true owner would know *</label>
               <textarea
-                v-model="claimForm.description"
-                rows="4"
-                placeholder="Describe identifying details — serial number, contents, markings, colour, brand..."
-                required
+                  v-model="claimForm.description"
+                  rows="4"
+                  placeholder="Describe identifying details — serial number, contents, markings, colour, brand..."
+                  required
               ></textarea>
               <p v-if="claimErrors.description" class="field-error">{{ claimErrors.description }}</p>
             </div>
@@ -124,14 +124,14 @@
               <label>Upload proof (optional)</label>
               <div class="upload-zone" @click="triggerFileInput">
                 <input
-                  ref="fileInput"
-                  type="file"
-                  accept="image/*"
-                  style="display:none"
-                  @change="handleProofUpload"
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*"
+                    style="display:none"
+                    @change="handleProofUpload"
                 />
                 <div v-if="proofPreview">
-                  <img :src="proofPreview" class="proof-preview" alt="Proof preview" />
+                  <img :src="proofPreview" class="proof-preview" alt="Proof preview"/>
                   <p class="upload-hint">Click to change</p>
                 </div>
                 <div v-else>
@@ -161,50 +161,46 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/store/auth'
+import {onMounted} from 'vue'
+import {useRoute} from 'vue-router'
 import api from '@/services/api'
+import {useItemDetailStore} from "@/store/itemDetailStore";
+import {storeToRefs} from "pinia";
 
-const route        = useRoute()
-const auth         = useAuthStore()
-const item         = ref(null)
-const loading      = ref(true)
-const showClaimModal = ref(false)
-const submitting   = ref(false)
-const proofBase64  = ref(null)
-const proofPreview = ref(null)
-const fileInput    = ref(null)
-const claimError   = ref('')
-const claimSuccess = ref('')
-const claimErrors  = ref({})
-const toast        = ref({ message: '', type: '' })
+const route = useRoute()
+const itemStore = useItemDetailStore();
+const {
+  item,
+  loading,
+  submitting,
+  fileInput,
+  proofPreview,
+  proofBase64,
+  claimErrors,
+  claimError,
+  claimSuccess,
+  claimForm,
+  lostItemId,
+  showClaimModal,
+  isOwnItem,
+  canClaim,
+  toast
+} = storeToRefs(itemStore);
 
-const claimForm = ref({ description: '' })
-
-
-const isOwnItem = computed(() => auth.user?.id === item.value?.posted_by)
-const canClaim  = computed(() =>
-  auth.isLoggedIn &&
-  !isOwnItem.value &&
-  item.value?.report_type === 'found' &&
-  item.value?.status === 'active'
-)
-const lostItemId = computed(() => route.query.lost_item_id || null)
 
 onMounted(async () => {
   try {
     const res = await api.get(`/items/${route.params.id}`)
-    item.value = res.data
+    itemStore.item.value = res.data
   } catch (e) {
-    item.value = null
+    itemStore.item.value = null
   } finally {
-    loading.value = false
+    itemStore.loading.value = false
   }
 })
 
 function triggerFileInput() {
-  fileInput.value?.click()
+  fileInput.value?.click();
 }
 
 function handleProofUpload(e) {
@@ -213,17 +209,17 @@ function handleProofUpload(e) {
   const reader = new FileReader()
   reader.onload = (ev) => {
     proofPreview.value = ev.target.result
-    proofBase64.value  = ev.target.result.split(',')[1] // strip data URI prefix
+    proofBase64.value = ev.target.result.split(',')[1] // strip data URI prefix
   }
   reader.readAsDataURL(file)
 }
 
 async function submitClaim() {
   claimErrors.value = {}
-  claimError.value  = ''
+  claimError.value = ''
   claimSuccess.value = ''
 
-  if (!claimForm.value.description.trim()) {
+  if (claimForm.value.description.trim()) {
     claimErrors.value.description = 'Please describe why this item belongs to you.'
     return
   }
@@ -231,28 +227,32 @@ async function submitClaim() {
   submitting.value = true
   try {
     await api.post('/claims', {
-      item_id:      item.value.item_id,
-      description:  claimForm.value.description,
-      proof:        proofBase64.value || undefined,
+      item_id: item.value.item_id,
+      description: claimForm.value.description,
+      proof: proofBase64.value || undefined,
       lost_item_id: lostItemId.value || undefined,
     })
     claimSuccess.value = 'Claim submitted successfully. The item owner will review your request.'
     showToast('Claim submitted successfully', 'success')
-    setTimeout(() => { showClaimModal.value = false }, 2000)
+    setTimeout(() => {
+      showClaimModal.value = false
+    }, 2000)
   } catch (e) {
     claimError.value = e.response?.data?.error || 'Failed to submit claim. Please try again.'
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
 }
 
 function formatDate(d) {
-  return d ? new Date(d).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+  return d ? new Date(d).toLocaleDateString('en-MY', {day: 'numeric', month: 'short', year: 'numeric'}) : '—'
 }
 
 function showToast(message, type = 'success') {
-  toast.value = { message, type }
-  setTimeout(() => { toast.value = { message: '', type: '' } }, 3500)
+  itemStore.toast.value = {message, type}
+  setTimeout(() => {
+    itemStore.toast.value = {message: '', type: ''}
+  }, 3500)
 }
 </script>
 
@@ -268,8 +268,15 @@ function showToast(message, type = 'success') {
   color: #999;
   margin-bottom: 1.75rem;
 }
-.breadcrumb a { color: #CC0001; text-decoration: none; }
-.breadcrumb a:hover { text-decoration: underline; }
+
+.breadcrumb a {
+  color: #CC0001;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
 
 .detail-layout {
   display: flex;
@@ -277,7 +284,9 @@ function showToast(message, type = 'success') {
   align-items: flex-start;
 }
 
-.detail-main { flex: 1; }
+.detail-main {
+  flex: 1;
+}
 
 .item-image {
   width: 100%;
@@ -291,18 +300,62 @@ function showToast(message, type = 'success') {
   align-items: center;
   justify-content: center;
 }
-.item-image img { width: 100%; height: 100%; object-fit: cover; }
-.image-placeholder { font-size: 4rem; }
 
-.title-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-.title-row h1 { font-size: 1.6rem; font-weight: 800; color: #1a1a1a; margin: 0; }
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-.description { color: #444; line-height: 1.7; margin-bottom: 1.5rem; }
+.image-placeholder {
+  font-size: 4rem;
+}
 
-.meta-grid { display: flex; gap: 2rem; flex-wrap: wrap; }
-.meta-block { display: flex; flex-direction: column; gap: 0.2rem; }
-.meta-label { font-size: 0.75rem; color: #999; font-weight: 600; text-transform: uppercase; }
-.meta-value { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; }
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.title-row h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.description {
+  color: #444;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.meta-grid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
 
 /* Action card */
 .action-card {
@@ -315,13 +368,49 @@ function showToast(message, type = 'success') {
   position: sticky;
   top: 5rem;
 }
-.posted-by-label { font-size: 0.75rem; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem; }
-.posted-by-email { font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.15rem; }
-.posted-date { font-size: 0.82rem; color: #999; }
-.divider { border: none; border-top: 1px solid #eee; margin: 1rem 0; }
-.action-hint { font-size: 0.85rem; color: #555; line-height: 1.5; margin-bottom: 1rem; }
-.claimed-text { color: #999; }
-.full-width { width: 100%; text-align: center; display: block; }
+
+.posted-by-label {
+  font-size: 0.75rem;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.posted-by-email {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.15rem;
+}
+
+.posted-date {
+  font-size: 0.82rem;
+  color: #999;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 1rem 0;
+}
+
+.action-hint {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.claimed-text {
+  color: #999;
+}
+
+.full-width {
+  width: 100%;
+  text-align: center;
+  display: block;
+}
 
 /* Badges */
 .badge {
@@ -332,10 +421,26 @@ function showToast(message, type = 'success') {
   font-weight: 700;
   text-transform: capitalize;
 }
-.badge.lost    { background: #fff0f0; color: #CC0001; }
-.badge.found   { background: #eff6ff; color: #1d4ed8; }
-.badge.active  { background: #f0fdf4; color: #15803d; }
-.badge.claimed { background: #f5f3ff; color: #7c3aed; }
+
+.badge.lost {
+  background: #fff0f0;
+  color: #CC0001;
+}
+
+.badge.found {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.badge.active {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.badge.claimed {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
 
 /* Buttons */
 .btn {
@@ -349,23 +454,45 @@ function showToast(message, type = 'success') {
   text-decoration: none;
   transition: all 0.15s;
 }
-.btn-primary { background: #CC0001; color: white; border-color: #CC0001; }
-.btn-primary:hover:not(:disabled) { background: #a80001; border-color: #a80001; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-outline { background: white; color: #CC0001; border-color: #CC0001; }
-.btn-outline:hover { background: #fff0f0; }
+
+.btn-primary {
+  background: #CC0001;
+  color: white;
+  border-color: #CC0001;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #a80001;
+  border-color: #a80001;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: white;
+  color: #CC0001;
+  border-color: #CC0001;
+}
+
+.btn-outline:hover {
+  background: #fff0f0;
+}
 
 /* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9000;
   padding: 1rem;
 }
+
 .modal {
   background: white;
   border-radius: 14px;
@@ -374,12 +501,33 @@ function showToast(message, type = 'success') {
   max-width: 540px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-.modal-header h2 { font-size: 1.25rem; font-weight: 800; color: #1a1a1a; }
-.modal-close { background: none; border: none; font-size: 1.1rem; color: #999; cursor: pointer; }
-.modal-close:hover { color: #1a1a1a; }
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #999;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #1a1a1a;
+}
 
 .claim-comparison {
   background: #fafafa;
@@ -388,13 +536,45 @@ function showToast(message, type = 'success') {
   padding: 1rem;
   margin-bottom: 1.5rem;
 }
-.compare-label { font-size: 0.7rem; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 0.25rem; }
-.compare-title { font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.2rem; }
-.compare-meta { font-size: 0.85rem; color: #666; }
 
-.claim-form { display: flex; flex-direction: column; gap: 1.25rem; }
-.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-.form-group label { font-size: 0.88rem; font-weight: 600; color: #333; }
+.compare-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.compare-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.2rem;
+}
+
+.compare-meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #333;
+}
+
 .form-group textarea {
   border: 1px solid #e5e5e5;
   border-radius: 8px;
@@ -404,7 +584,11 @@ function showToast(message, type = 'success') {
   font-family: inherit;
   transition: border-color 0.15s;
 }
-.form-group textarea:focus { outline: none; border-color: #CC0001; }
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #CC0001;
+}
 
 .upload-zone {
   border: 2px dashed #e5e5e5;
@@ -414,16 +598,51 @@ function showToast(message, type = 'success') {
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.upload-zone:hover { border-color: #CC0001; }
-.upload-icon { font-size: 1.75rem; margin-bottom: 0.4rem; }
-.upload-hint { font-size: 0.83rem; color: #999; margin: 0; }
-.proof-preview { max-height: 140px; border-radius: 8px; margin-bottom: 0.4rem; }
 
-.field-error { color: #CC0001; font-size: 0.82rem; margin: 0; }
-.form-error   { color: #CC0001; font-size: 0.88rem; text-align: center; }
-.form-success { color: #15803d; font-size: 0.88rem; text-align: center; }
+.upload-zone:hover {
+  border-color: #CC0001;
+}
 
-.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.upload-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.upload-hint {
+  font-size: 0.83rem;
+  color: #999;
+  margin: 0;
+}
+
+.proof-preview {
+  max-height: 140px;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+}
+
+.field-error {
+  color: #CC0001;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.form-error {
+  color: #CC0001;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.form-success {
+  color: #15803d;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
 
 /* Toast */
 .toast {
@@ -436,15 +655,33 @@ function showToast(message, type = 'success') {
   font-size: 0.9rem;
   font-weight: 600;
   z-index: 9999;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
-.toast.success { background: #15803d; color: white; }
-.toast.error   { background: #CC0001; color: white; }
 
-.loading, .empty-state { text-align: center; padding: 3rem; color: #999; }
+.toast.success {
+  background: #15803d;
+  color: white;
+}
+
+.toast.error {
+  background: #CC0001;
+  color: white;
+}
+
+.loading, .empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
 
 @media (max-width: 700px) {
-  .detail-layout { flex-direction: column; }
-  .action-card { width: 100%; position: static; }
+  .detail-layout {
+    flex-direction: column;
+  }
+
+  .action-card {
+    width: 100%;
+    position: static;
+  }
 }
 </style>

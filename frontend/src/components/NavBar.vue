@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/store/auth'
+import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()

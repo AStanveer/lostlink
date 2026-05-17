@@ -174,7 +174,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useAuthStore } from '@/store/auth'
+import { useAuthStore } from '@/store/authStore'
 import api from '@/services/api'
 import { useRouter } from 'vue-router'
 const router = useRouter()
@@ -223,7 +223,7 @@ async function fetchDashboard() {
   try {
     if (!auth.user?.id) {
       showToast('Session expired, please login again', 'error')
-      router.push('/login')
+      await router.push('/login')
       return
     }
     const res = await api.get(`/dashboard/${auth.user.id}`)
