@@ -1,4 +1,4 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/**, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }*/
 
 :root {
   --primary: #d32f2f;
@@ -18,7 +18,7 @@ body {
   justify-content: space-between;
   padding: 1rem 2rem;
   background: #ffffff;
-  color: #333;
+  /*color: #333;*/
   border-bottom: 1px solid #e8e8e8;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
@@ -31,7 +31,7 @@ body {
 }
 
 .nav-links a {
-  color: #333;
+  /*color: #333;*/
   text-decoration: none;
   margin-left: 1.5rem;
   font-size: 0.95rem;

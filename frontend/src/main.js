@@ -6,6 +6,8 @@ import './assets/main.css'
 
 const app = createApp(App)
 
+import "./index.css"
+
 app.use(createPinia())
 app.use(router)
 app.mount('#app')

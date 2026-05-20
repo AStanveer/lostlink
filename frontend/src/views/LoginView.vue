@@ -71,8 +71,10 @@ async function handleLogin() {
   error.value = ''
   loading.value = true
   try {
+    console.log(email.value, password.value);
+
     await auth.login(email.value, password.value)
-    router.push('/')
+    await router.push('/')
   } catch (err) {
     error.value = err.response?.data?.error || 'Invalid email or password.'
   } finally {

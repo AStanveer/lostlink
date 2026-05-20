@@ -35,9 +35,9 @@ $app->add(function ($request, $handler) {
 
 // Public routes
 $app->post('/register', AuthController::class . ':register');
-$app->post('/login',    AuthController::class . ':login');
+$app->post('/login', AuthController::class . ':login');
 
-// OPTIONS preflight for CORS
+//   OPTIONS preflight for CORS
 $app->options('/{routes:.+}', function ($request, $response) {
     return $response;
 });
@@ -50,14 +50,14 @@ $app->post('/analyze', AnalyzeController::class . ':analyze');
 // Protected routes (JWT required)
 $app->group('', function (RouteCollectorProxy $group) {
     // Items
-    $group->post('/items',        ItemController::class . ':create');
-    $group->put('/items/{id}',    ItemController::class . ':update');
+    $group->post('/items', ItemController::class . ':create');
+    $group->put('/items/{id}', ItemController::class . ':update');
     $group->delete('/items/{id}', ItemController::class . ':delete');
 
     // Claims
-    $group->post('/claims',                    ClaimController::class . ':create');
-    $group->get('/claims/item/{itemId}',       ClaimController::class . ':getByItem');
-    $group->put('/claims/{id}',                ClaimController::class . ':updateStatus');
+    $group->post('/claims', ClaimController::class . ':create');
+    $group->get('/claims/item/{itemId}', ClaimController::class . ':getByItem');
+    $group->put('/claims/{id}', ClaimController::class . ':updateStatus');
     $group->post('/claims/{id}/received', ClaimController::class . ':markReceived');
 
     // Matches
@@ -65,7 +65,7 @@ $app->group('', function (RouteCollectorProxy $group) {
 
     // Dashboard
     $group->get('/dashboard/{userId}', DashboardController::class . ':index');
-    
+
 })->add(JwtMiddleware::class);
 
 $app->run();
