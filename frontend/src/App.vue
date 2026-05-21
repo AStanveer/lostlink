@@ -6,6 +6,7 @@
     </main>
     <FooterBar v-if="!isAuthPage" />
   </div>
+  <PiniaColadaDevtools />
 </template>
 
 <script setup>
@@ -13,6 +14,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import NavBar from '@/components/NavBar.vue'
 import FooterBar from '@/components/FooterBar.vue'
+import {PiniaColadaDevtools} from "@pinia/colada-devtools";
 
 const route = useRoute()
 const isAuthPage = computed(() => route.meta.guestOnly)
