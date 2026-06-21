@@ -1,11 +1,17 @@
 <template>
   <div class="report-page">
     <div class="report-container">
-      <h1 class="report-title">Report an Item</h1>
-      <p class="report-subtitle">Fill in the details below.</p>
+      <h1 class="report-title">{{ isEditMode ? 'Edit Report' : 'Report an Item' }}</h1>
+      <p class="report-subtitle">{{ isEditMode ? 'Update the details of your report.' : 'Fill in the details below.' }}</p>
+
+      <div v-if="loadingItem" class="loading-state">Loading report...</div>
+
+      <div v-else-if="loadError" class="form-error">{{ loadError }}</div>
+
+      <template v-else>
 
       <!-- Mode toggle -->
-      <div class="mode-toggle">
+      <div v-if="!isEditMode" class="mode-toggle">
         <button type="button" :class="['mode-btn', mode === 'ai' ? 'active' : '']" @click="mode = 'ai'">
           ✨ AI Auto-fill
         </button>
@@ -16,8 +22,17 @@
 
       <form @submit.prevent="handleSubmit" class="report-form">
 
+        <!-- Existing photo (edit mode — read only) -->
+        <div v-if="isEditMode" class="form-group">
+          <label>Photo</label>
+          <div class="photo-readonly">
+            <img v-if="existingImagePath" :src="`/api${existingImagePath}`" class="photo-preview" alt="Item photo" />
+            <p v-else class="no-photo-hint">No photo was attached to this report.</p>
+          </div>
+        </div>
+
         <!-- Photo upload -->
-        <div class="form-group">
+        <div v-else class="form-group">
           <label>
             Photo
             <span v-if="mode === 'ai'" class="vision-badge">✨ AI Auto-fill</span>
@@ -100,19 +115,22 @@
             <button
               type="button"
               :class="['type-btn', form.report_type === 'lost' ? 'active' : '']"
+              :disabled="isEditMode"
               @click="form.report_type = 'lost'"
             >I Lost This</button>
             <button
               type="button"
               :class="['type-btn', form.report_type === 'found' ? 'active' : '']"
+              :disabled="isEditMode"
               @click="form.report_type = 'found'"
             >I Found This</button>
           </div>
+          <p v-if="isEditMode" class="field-hint">Type can't be changed after reporting.</p>
         </div>
 
         <!-- Success message -->
         <div v-if="success" class="form-success">
-          ✅ Report submitted successfully! Redirecting...
+          ✅ {{ isEditMode ? 'Report updated successfully! Redirecting...' : 'Report submitted successfully! Redirecting...' }}
         </div>
 
         <!-- Error message -->
@@ -120,9 +138,9 @@
 
         <!-- Actions -->
         <div class="form-actions">
-          <button type="button" class="btn-cancel" @click="$router.push('/')">Cancel</button>
+          <button type="button" class="btn-cancel" @click="$router.push(isEditMode ? '/dashboard' : '/')">Cancel</button>
           <button type="submit" class="btn-submit" :disabled="submitting || analyzing">
-            {{ submitting ? 'Submitting...' : 'Submit Report' }}
+            {{ submitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Submit Report') }}
           </button>
         </div>
 
@@ -139,16 +157,27 @@
           </div>
         </div>
       </div>
+
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, nextTick, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import api from '@/services/api'
+import { useAuthStore } from '@/store/authStore'
 
 const router = useRouter()
+const route = useRoute()
+const auth = useAuthStore()
+
+const itemId = computed(() => route.params.id || null)
+const isEditMode = computed(() => !!itemId.value)
+const loadingItem = ref(isEditMode.value)
+const loadError = ref('')
+const existingImagePath = ref(null)
 
 const form = ref({
   title: '',
@@ -343,13 +372,45 @@ function handleDrop(e) {
 
 const success = ref(false)
 
+onMounted(async () => {
+  if (!isEditMode.value) return
+
+  mode.value = 'manual'
+  try {
+    const { data } = await api.get(`/items/${itemId.value}`)
+
+    if (data.posted_by !== auth.user?.id) {
+      loadError.value = "You don't have permission to edit this report."
+      return
+    }
+
+    form.value = {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      location: data.location,
+      date: data.date ? data.date.slice(0, 10) : '',
+      report_type: data.report_type,
+    }
+    existingImagePath.value = data.image_path
+  } catch (err) {
+    loadError.value = err.response?.data?.error || 'Failed to load this report.'
+  } finally {
+    loadingItem.value = false
+  }
+})
+
 async function handleSubmit() {
   error.value = ''
   submitting.value = true
   try {
-    await api.post('/items', { ...form.value, image: imageData.value })
+    if (isEditMode.value) {
+      await api.put(`/items/${itemId.value}`, { ...form.value })
+    } else {
+      await api.post('/items', { ...form.value, image: imageData.value })
+    }
     success.value = true
-    setTimeout(() => router.push('/'), 2000)
+    setTimeout(() => router.push(isEditMode.value ? '/dashboard' : '/'), 1500)
   } catch (err) {
     error.value = err.response?.data?.error || 'Failed to submit report. Please try again.'
   } finally {
@@ -386,6 +447,33 @@ async function handleSubmit() {
   color: var(--muted);
   font-size: 0.95rem;
   margin-bottom: 2rem;
+}
+
+.loading-state {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem 0;
+}
+
+.photo-readonly {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.no-photo-hint {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0.5rem 0 0;
 }
 
 /* ── Mode Toggle ──────────────────────────────────── */
@@ -581,6 +669,11 @@ async function handleSubmit() {
   background: var(--primary-light);
   color: var(--primary);
   border-color: var(--primary);
+}
+
+.type-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
 }
 
 /* ── Camera Modal ─────────────────────────────────── */

@@ -32,7 +32,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/report',
+    path: '/report/:id?',
     name: 'Report',
     component: () => import('@/views/ReportView.vue'),
     meta: { requiresAuth: true }

@@ -47,6 +47,7 @@
             <div class="report-meta">
               <span class="badge" :class="item.report_type">{{ item.report_type }}</span>
               <span class="badge status" :class="item.status">{{ item.status }}</span>
+              <RouterLink :to="`/report/${item.item_id}`" class="btn-edit" title="Edit this report">✏️ Edit</RouterLink>
               <button class="btn-delete" @click="deleteReport(item.item_id)" title="Delete this report">🗑 Delete</button>
             </div>
             <h3>{{ item.title }}</h3>
@@ -397,8 +398,19 @@ function showToast(message, type = 'success') {
   transform: translateY(-1px);
 }
 .report-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-.btn-delete {
+.btn-edit {
   margin-left: auto;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+.btn-edit:hover { color: var(--primary); }
+.btn-delete {
   background: none;
   border: none;
   color: #999;
