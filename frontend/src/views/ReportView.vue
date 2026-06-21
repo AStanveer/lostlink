@@ -360,7 +360,7 @@ async function handleSubmit() {
 
 <style scoped>
 .report-page {
-  background: #fff;
+  background: var(--bg);
   min-height: calc(100vh - 60px);
   padding: 2.5rem 1rem 4rem;
 }
@@ -368,17 +368,22 @@ async function handleSubmit() {
 .report-container {
   max-width: 600px;
   margin: 0 auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 2.25rem 2rem;
 }
 
 .report-title {
   font-size: 1.75rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-weight: 800;
+  color: var(--ink);
   margin-bottom: 0.25rem;
 }
 
 .report-subtitle {
-  color: #666;
+  color: var(--muted);
   font-size: 0.95rem;
   margin-bottom: 2rem;
 }
@@ -387,30 +392,29 @@ async function handleSubmit() {
 .mode-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  overflow: hidden;
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
   margin-bottom: 1.75rem;
 }
 
 .mode-btn {
-  padding: 0.8rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: 0.7rem;
+  font-size: 0.92rem;
+  font-weight: 700;
   cursor: pointer;
-  background: #f9f9f9;
-  color: #666;
+  background: transparent;
+  color: var(--muted);
   border: none;
+  border-radius: 999px;
   transition: background 0.15s, color 0.15s;
 }
 
-.mode-btn:first-child {
-  border-right: 1px solid #d0d0d0;
-}
-
 .mode-btn.active {
-  background: var(--primary-light);
+  background: white;
   color: var(--primary);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ── Form fields ──────────────────────────────────── */
@@ -423,8 +427,8 @@ async function handleSubmit() {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: var(--ink);
   margin-bottom: 0.5rem;
 }
 
@@ -443,13 +447,13 @@ async function handleSubmit() {
 .form-group select {
   width: 100%;
   padding: 0.7rem 0.9rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
-  color: #333;
-  background: #fff;
+  color: var(--ink);
+  background: var(--bg);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
   font-family: inherit;
 }
 
@@ -457,6 +461,8 @@ async function handleSubmit() {
 .form-group textarea:focus,
 .form-group select:focus {
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  background: white;
 }
 
 .form-group textarea {
@@ -472,16 +478,19 @@ async function handleSubmit() {
 }
 
 .photo-upload {
-  border: 2px dashed #d0d0d0;
-  border-radius: 8px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
   padding: 2.5rem 1rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s;
+  background: var(--bg);
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
 
 .photo-upload:hover {
   border-color: var(--primary);
+  background: var(--primary-50);
+  transform: translateY(-2px);
 }
 
 .photo-upload input {
@@ -553,31 +562,25 @@ async function handleSubmit() {
 .type-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  overflow: hidden;
+  gap: 0.6rem;
 }
 
 .type-btn {
   padding: 0.75rem;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  background: #fff;
-  color: #555;
-  border: none;
-  transition: background 0.15s, color 0.15s;
-}
-
-.type-btn:first-child {
-  border-right: 1px solid #d0d0d0;
+  background: var(--bg);
+  color: var(--ink-soft);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .type-btn.active {
-  background: #fff0f0;
+  background: var(--primary-light);
   color: var(--primary);
-  outline: 2px solid var(--primary);
-  outline-offset: -2px;
+  border-color: var(--primary);
 }
 
 /* ── Camera Modal ─────────────────────────────────── */
@@ -663,31 +666,35 @@ async function handleSubmit() {
 
 .btn-cancel {
   padding: 0.75rem 2rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
-  font-weight: 600;
-  background: #fff;
-  color: #333;
-  border: 1px solid #d0d0d0;
+  font-weight: 700;
+  background: white;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--border);
   cursor: pointer;
   transition: background 0.15s;
 }
 
-.btn-cancel:hover { background: #f5f5f5; }
+.btn-cancel:hover { background: var(--bg); }
 
 .btn-submit {
   padding: 0.75rem 2rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   background: var(--primary);
   color: white;
   border: none;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
-.btn-submit:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-submit:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
 
 .btn-submit:disabled {
   opacity: 0.6;

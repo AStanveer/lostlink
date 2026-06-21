@@ -354,8 +354,8 @@ function showToast(message, type = 'success') {
   cursor: pointer;
   transition: all 0.15s;
 }
-.tab.active { background: #CC0001; color: white; border-color: #CC0001; }
-.tab:hover:not(.active) { border-color: #CC0001; color: #CC0001; }
+.tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 
 .tab-content { animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -373,21 +373,27 @@ function showToast(message, type = 'success') {
   font-weight: 700;
   text-transform: capitalize;
 }
-.badge.lost    { background: #fff0f0; color: #CC0001; }
+.badge.lost    { background: #fff0f0; color: var(--primary); }
 .badge.found   { background: #eff6ff; color: #1d4ed8; }
 .badge.active  { background: #f0fdf4; color: #15803d; }
 .badge.claimed { background: #f5f3ff; color: #7c3aed; }
 .badge.pending  { background: #fffbeb; color: #92400e; }
 .badge.approved { background: #f0fdf4; color: #15803d; }
-.badge.rejected { background: #fff0f0; color: #CC0001; }
+.badge.rejected { background: #fff0f0; color: var(--primary); }
 
 /* Report cards */
 .reports-list { display: flex; flex-direction: column; gap: 1rem; }
 .report-card {
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 1.25rem 1.5rem;
   background: white;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.report-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .report-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .btn-delete {
@@ -400,13 +406,13 @@ function showToast(message, type = 'success') {
   cursor: pointer;
   padding: 0;
 }
-.btn-delete:hover { color: #CC0001; }
+.btn-delete:hover { color: var(--primary); }
 .report-card h3 { font-size: 1.05rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.35rem; }
 .meta-row { font-size: 0.85rem; color: #666; }
 
 /* Incoming claims */
 .claims-section { margin-top: 1rem; border-top: 1px solid #f0f0f0; padding-top: 0.75rem; }
-.btn-link { background: none; border: none; color: #CC0001; font-size: 0.88rem; font-weight: 600; cursor: pointer; padding: 0; }
+.btn-link { background: none; border: none; color: var(--primary); font-size: 0.88rem; font-weight: 600; cursor: pointer; padding: 0; }
 .btn-link:hover { text-decoration: underline; }
 .incoming-claims { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .claim-row {
@@ -442,19 +448,25 @@ function showToast(message, type = 'success') {
   display: flex;
   align-items: center;
   gap: 1rem;
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 1.25rem 1.5rem;
   background: white;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, transform 0.15s;
   flex-wrap: wrap;
+}
+.match-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .match-side { flex: 1; min-width: 160px; }
 .match-label { font-size: 0.7rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
 .match-side h3 { font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.2rem; }
 .match-meta { font-size: 0.85rem; color: #666; margin: 0; }
 .match-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; padding: 0 0.5rem; }
-.arrow { font-size: 1.25rem; color: #CC0001; }
-.match-word { font-size: 0.75rem; font-weight: 700; color: #CC0001; }
+.arrow { font-size: 1.25rem; color: var(--primary); }
+.match-word { font-size: 0.75rem; font-weight: 700; color: var(--primary); }
 .view-claim-btn { white-space: nowrap; flex-shrink: 0; }
 
 /* Buttons */
@@ -469,11 +481,11 @@ function showToast(message, type = 'success') {
   border: 2px solid transparent;
   transition: all 0.15s;
 }
-.btn-primary { background: #CC0001; color: white; border-color: #CC0001; }
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
 .btn-primary:hover { background: #a80001; border-color: #a80001; }
-.btn-outline { background: white; color: #CC0001; border-color: #CC0001; }
+.btn-outline { background: white; color: var(--primary); border-color: var(--primary); }
 .btn-outline:hover { background: #fff0f0; }
-.btn-danger { background: white; color: #CC0001; border: 2px solid #CC0001; }
+.btn-danger { background: white; color: var(--primary); border: 2px solid var(--primary); }
 .btn-danger:hover { background: #fff0f0; }
 .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.82rem; }
 
@@ -491,7 +503,7 @@ function showToast(message, type = 'success') {
   box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 .toast.success { background: #15803d; color: white; }
-.toast.error   { background: #CC0001; color: white; }
+.toast.error   { background: var(--primary); color: white; }
 
 /* Empty state */
 .empty-state { text-align: center; color: #999; padding: 3rem 0; font-size: 0.95rem; }

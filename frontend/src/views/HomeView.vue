@@ -3,13 +3,18 @@
 
     <!-- Hero Section -->
     <section class="hero">
-      <h1 class="hero-title">Lost Something on Campus?</h1>
-      <p class="hero-subtitle">
-        LostLink helps UTM students and staff report and recover lost items — fast and hassle-free.
-      </p>
-      <div class="hero-actions">
-        <RouterLink to="/report" class="btn btn-primary">Report Lost Item</RouterLink>
-        <RouterLink to="/report" class="btn btn-outline">Report Found Item</RouterLink>
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+      <div class="hero-content">
+        <span class="hero-badge">🎓 Built for UTM students &amp; staff</span>
+        <h1 class="hero-title">Lost Something on Campus?</h1>
+        <p class="hero-subtitle">
+          LostLink helps UTM students and staff report and recover lost items — fast and hassle-free.
+        </p>
+        <div class="hero-actions">
+          <RouterLink to="/report" class="btn btn-primary">Report Lost Item</RouterLink>
+          <RouterLink to="/items" class="btn btn-outline">Browse Found Items</RouterLink>
+        </div>
       </div>
     </section>
 
@@ -63,6 +68,24 @@
       </div>
     </section>
 
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+      <h2 v-if="auth.isLoggedIn">Got something to report?</h2>
+      <h2 v-else>Ready to get your stuff back?</h2>
+      <p v-if="auth.isLoggedIn">Head to your dashboard to track reports, claims, and matches.</p>
+      <p v-else>Create a free account and start reporting in under a minute.</p>
+      <div class="cta-actions">
+        <template v-if="auth.isLoggedIn">
+          <RouterLink to="/dashboard" class="btn btn-white">Go to Dashboard</RouterLink>
+          <RouterLink to="/report" class="btn btn-outline-white">Report an Item</RouterLink>
+        </template>
+        <template v-else>
+          <RouterLink to="/register" class="btn btn-white">Create Account</RouterLink>
+          <RouterLink to="/items" class="btn btn-outline-white">Browse Items</RouterLink>
+        </template>
+      </div>
+    </section>
+
   </div>
 </template>
 
@@ -75,17 +98,59 @@ const auth = useAuthStore()
 <style scoped>
 /* ── Hero ─────────────────────────────────────────── */
 .hero {
-  background: #ffffff;
+  position: relative;
+  background: linear-gradient(180deg, #fff9f9 0%, #ffffff 65%);
   text-align: center;
-  padding: 5rem 2rem 4rem;
-  border-bottom: 1px solid #eee;
+  padding: 6rem 2rem 4.5rem;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  z-index: 0;
+}
+
+.hero-blob-1 {
+  width: 360px;
+  height: 360px;
+  background: var(--primary-light);
+  top: -140px;
+  left: -100px;
+}
+
+.hero-blob-2 {
+  width: 280px;
+  height: 280px;
+  background: var(--accent-blue-light);
+  top: -60px;
+  right: -80px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
 }
 
 .hero-title {
-  font-size: 2.8rem;
+  font-size: 2.9rem;
   font-weight: 800;
-  color: #1a1a1a;
-  line-height: 1.2;
+  color: var(--ink);
+  line-height: 1.15;
   margin-bottom: 1.25rem;
   max-width: 640px;
   margin-left: auto;
@@ -94,7 +159,7 @@ const auth = useAuthStore()
 
 .hero-subtitle {
   font-size: 1.1rem;
-  color: #555;
+  color: var(--ink-soft);
   line-height: 1.7;
   max-width: 520px;
   margin: 0 auto 2.25rem;
@@ -111,9 +176,9 @@ const auth = useAuthStore()
 .btn {
   display: inline-block;
   padding: 0.75rem 1.75rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
   cursor: pointer;
@@ -128,7 +193,7 @@ const auth = useAuthStore()
   background: var(--primary-dark);
   border-color: var(--primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(211,47,47,0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-outline {
@@ -148,6 +213,7 @@ const auth = useAuthStore()
 }
 .btn-white:hover {
   background: #f5f5f5;
+  transform: translateY(-1px);
 }
 
 .btn-outline-white {
@@ -156,25 +222,26 @@ const auth = useAuthStore()
   border: 2px solid white;
 }
 .btn-outline-white:hover {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
 }
 
 /* ── How It Works ─────────────────────────────────── */
 .how-it-works {
-  background: #f8f8f8;
+  background: var(--bg);
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 4.5rem 2rem;
 }
 
 .section-title {
-  font-size: 1.85rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--ink);
   margin-bottom: 0.5rem;
 }
 
 .section-subtitle {
-  color: #666;
+  color: var(--muted);
   font-size: 1rem;
   margin-bottom: 3rem;
 }
@@ -189,11 +256,18 @@ const auth = useAuthStore()
 
 .step {
   background: white;
-  border-radius: 12px;
-  padding: 2rem 1.5rem;
-  width: 220px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 1.75rem;
+  width: 230px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
   text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.step:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .step-icon {
@@ -213,20 +287,19 @@ const auth = useAuthStore()
 .step h3 {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #1a1a1a;
   margin-bottom: 0.5rem;
 }
 
 .step p {
   font-size: 0.88rem;
-  color: #666;
+  color: var(--muted);
   line-height: 1.6;
 }
 
 .step-arrow {
   font-size: 1.5rem;
-  color: #ccc;
-  padding: 2rem 0.75rem 0;
+  color: var(--border);
+  padding: 2.5rem 0.75rem 0;
   flex-shrink: 0;
   align-self: center;
 }
@@ -235,7 +308,7 @@ const auth = useAuthStore()
 .features {
   background: #ffffff;
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 4.5rem 2rem;
 }
 
 .feature-grid {
@@ -249,55 +322,63 @@ const auth = useAuthStore()
 }
 
 .feature-card {
-  background: #fafafa;
-  border: 1px solid #eee;
-  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 2rem 1.5rem;
   text-align: left;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .feature-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(211,47,47,0.1);
+  box-shadow: var(--shadow-md);
   border-color: var(--primary-light);
 }
 
 .feature-icon {
-  font-size: 1.75rem;
-  margin-bottom: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1rem;
 }
 
 .feature-card h3 {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #1a1a1a;
   margin-bottom: 0.4rem;
 }
 
 .feature-card p {
-  font-size: 0.88rem;
-  color: #666;
+  font-size: 0.9rem;
+  color: var(--muted);
   line-height: 1.6;
 }
 
 /* ── CTA Banner ───────────────────────────────────── */
 .cta-banner {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 4.5rem 2rem;
 }
 
 .cta-banner h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: white;
   margin-bottom: 0.6rem;
 }
 
 .cta-banner p {
   font-size: 1rem;
-  opacity: 0.85;
+  opacity: 0.9;
   margin-bottom: 2rem;
 }
 
@@ -310,7 +391,8 @@ const auth = useAuthStore()
 
 /* ── Responsive ───────────────────────────────────── */
 @media (max-width: 680px) {
-  .hero-title { font-size: 2rem; }
+  .hero { padding: 4.5rem 1.5rem 3.5rem; }
+  .hero-title { font-size: 2.1rem; }
 
   .step-arrow { display: none; }
 

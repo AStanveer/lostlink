@@ -270,7 +270,7 @@ function showToast(message, type = 'success') {
 }
 
 .breadcrumb a {
-  color: #CC0001;
+  color: var(--primary);
   text-decoration: none;
 }
 
@@ -291,10 +291,11 @@ function showToast(message, type = 'success') {
 .item-image {
   width: 100%;
   aspect-ratio: 4/3;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: #f5f5f5;
-  border: 1px solid #eee;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
@@ -361,10 +362,12 @@ function showToast(message, type = 'success') {
 .action-card {
   width: 280px;
   flex-shrink: 0;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  border-top: 3px solid var(--primary);
   padding: 1.5rem;
   background: white;
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 5rem;
 }
@@ -424,7 +427,7 @@ function showToast(message, type = 'success') {
 
 .badge.lost {
   background: #fff0f0;
-  color: #CC0001;
+  color: var(--primary);
 }
 
 .badge.found {
@@ -446,9 +449,9 @@ function showToast(message, type = 'success') {
 .btn {
   display: inline-block;
   padding: 0.65rem 1.4rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   border: 2px solid transparent;
   text-decoration: none;
@@ -456,14 +459,16 @@ function showToast(message, type = 'success') {
 }
 
 .btn-primary {
-  background: #CC0001;
+  background: var(--primary);
   color: white;
-  border-color: #CC0001;
+  border-color: var(--primary);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #a80001;
-  border-color: #a80001;
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:disabled {
@@ -473,8 +478,8 @@ function showToast(message, type = 'success') {
 
 .btn-outline {
   background: white;
-  color: #CC0001;
-  border-color: #CC0001;
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .btn-outline:hover {
@@ -495,7 +500,7 @@ function showToast(message, type = 'success') {
 
 .modal {
   background: white;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 2rem;
   width: 100%;
   max-width: 540px;
@@ -587,7 +592,7 @@ function showToast(message, type = 'success') {
 
 .form-group textarea:focus {
   outline: none;
-  border-color: #CC0001;
+  border-color: var(--primary);
 }
 
 .upload-zone {
@@ -600,7 +605,7 @@ function showToast(message, type = 'success') {
 }
 
 .upload-zone:hover {
-  border-color: #CC0001;
+  border-color: var(--primary);
 }
 
 .upload-icon {
@@ -621,13 +626,13 @@ function showToast(message, type = 'success') {
 }
 
 .field-error {
-  color: #CC0001;
+  color: var(--primary);
   font-size: 0.82rem;
   margin: 0;
 }
 
 .form-error {
-  color: #CC0001;
+  color: var(--primary);
   font-size: 0.88rem;
   text-align: center;
 }
@@ -664,7 +669,7 @@ function showToast(message, type = 'success') {
 }
 
 .toast.error {
-  background: #CC0001;
+  background: var(--primary);
   color: white;
 }
 

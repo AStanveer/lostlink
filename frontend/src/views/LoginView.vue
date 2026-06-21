@@ -3,6 +3,7 @@
 
     <!-- Left branding panel -->
     <div class="auth-panel">
+      <div class="panel-pattern"></div>
       <div class="panel-content">
         <div class="panel-logo">🔗</div>
         <h1>LostLink</h1>
@@ -89,22 +90,42 @@ async function handleLogin() {
 
 /* ── Left Panel ───────────────────────────────────── */
 .auth-panel {
+  position: relative;
   flex: 1;
-  background: linear-gradient(145deg, #c62828 0%, #d32f2f 50%, #b71c1c 100%);
+  background: linear-gradient(145deg, #c62828 0%, #d32f2f 50%, #911a17 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 3rem 2.5rem;
   color: white;
+  overflow: hidden;
+}
+
+.panel-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.18) 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(circle at 30% 30%, black, transparent 70%);
 }
 
 .panel-content {
+  position: relative;
+  z-index: 1;
   max-width: 360px;
 }
 
 .panel-logo {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  font-size: 1.9rem;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
 }
 
 .panel-content h1 {
@@ -147,22 +168,23 @@ async function handleLogin() {
 
 .auth-card {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 2.5rem 2.25rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
 }
 
 .auth-card h2 {
   font-size: 1.6rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-weight: 800;
+  color: var(--ink);
   margin-bottom: 0.3rem;
 }
 
 .auth-sub {
-  color: #888;
+  color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
 }
