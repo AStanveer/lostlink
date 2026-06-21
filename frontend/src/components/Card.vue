@@ -49,7 +49,7 @@ const postedAgo = computed(() => {
       class="group flex flex-col bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
   >
     <div class="relative">
-      <img :src="item.image_path ? item.image_path : placeholder" class="w-full h-48 object-cover object-top" alt="Posted image">
+      <img :src="item.image_path ? `/api${item.image_path}` : placeholder" class="w-full h-48 object-cover object-center" alt="Posted image">
       <span
           class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-sm"
           :class="isLost ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'bg-blue-50 text-blue-700'"

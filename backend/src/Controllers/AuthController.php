@@ -12,12 +12,13 @@ class AuthController
 {
     public function register(Request $request, Response $response): Response
     {
-        $data = $request->getParsedBody();
+        $data     = $request->getParsedBody();
         $email    = trim($data['email'] ?? '');
+        $name     = trim($data['name'] ?? '');
         $password = $data['password'] ?? '';
 
-        if (!$email || !$password) {
-            $response->getBody()->write(json_encode(['error' => 'Email and password required']));
+        if (!$email || !$password || !$name) {
+            $response->getBody()->write(json_encode(['error' => 'Name, email and password required']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
@@ -41,7 +42,7 @@ class AuthController
         }
 
         $hash = password_hash($password, PASSWORD_BCRYPT);
-        $db->prepare('INSERT INTO users (email, password) VALUES (?, ?)')->execute([$email, $hash]);
+        $db->prepare('INSERT INTO users (email, name, password) VALUES (?, ?, ?)')->execute([$email, $name, $hash]);
 
         $response->getBody()->write(json_encode(['message' => 'User registered successfully']));
         return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
@@ -66,6 +67,7 @@ class AuthController
         $payload = [
             'sub' => $user['user_id'],
             'email' => $user['email'],
+            'name' => $user['name'],
             'iat' => time(),
             'exp' => time() + 60 * 60 * 24, // 24 hours
         ];
@@ -74,7 +76,7 @@ class AuthController
 
         $response->getBody()->write(json_encode([
             'token' => $token,
-            'user'  => ['id' => $user['user_id'], 'email' => $user['email']]
+            'user'  => ['id' => $user['user_id'], 'email' => $user['email'], 'name' => $user['name']]
         ]));
         return $response->withHeader('Content-Type', 'application/json');
     }

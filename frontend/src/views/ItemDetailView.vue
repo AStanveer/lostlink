@@ -51,7 +51,7 @@
         <!-- Right: action card -->
         <div class="action-card">
           <p class="posted-by-label">Posted by</p>
-          <p class="posted-by-email">{{ item.posted_by || 'Campus user' }}</p>
+          <p class="posted-by-email">{{ item.posted_by_name || item.posted_by_email || 'Campus user' }}</p>
           <p class="posted-date">{{ formatDate(item.date) }}</p>
 
           <hr class="divider"/>

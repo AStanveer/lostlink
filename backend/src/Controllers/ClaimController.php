@@ -87,7 +87,7 @@ class ClaimController
         }
 
         $stmt = $db->prepare(
-            'SELECT cr.*, u.email AS claimant_email
+            'SELECT cr.*, u.email AS claimant_email, u.name AS claimant_name
              FROM claim_requests cr
              JOIN users u ON cr.claimed_by = u.user_id
              WHERE cr.item_id = ?

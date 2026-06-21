@@ -90,7 +90,7 @@ async function handleRegister() {
 
   loading.value = true
   try {
-    await auth.register(email.value, password.value)
+    await auth.register(name.value, email.value, password.value)
     success.value = 'Account created! Redirecting to login...'
     setTimeout(() => router.push('/login'), 1500)
   } catch (err) {

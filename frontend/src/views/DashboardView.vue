@@ -11,7 +11,7 @@
 
     <div class="dashboard-header">
       <h1>My Dashboard</h1>
-      <p class="subtitle">Welcome, {{ auth.user?.email }}</p>
+      <p class="subtitle">Welcome, {{ auth.user?.name || auth.user?.email }}</p>
     </div>
 
     <!-- Tabs -->
@@ -64,7 +64,7 @@
               <div v-else-if="incomingClaims.length === 0" class="empty-sm">No claims yet.</div>
               <div v-else v-for="claim in incomingClaims" :key="claim.request_id" class="claim-row">
                 <div class="claim-info">
-                  <p class="claimant">✉️ {{ claim.claimant_email }}</p>
+                  <p class="claimant">✉️ {{ claim.claimant_name || claim.claimant_email }}</p>
                   <p class="claim-desc">{{ claim.description }}</p>
                   <div v-if="claim.proof_path" class="proof-img-wrap">
                     <p class="proof-label">Proof submitted:</p>

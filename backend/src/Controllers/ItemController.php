@@ -47,7 +47,12 @@ class ItemController
     public function show(Request $request, Response $response, array $args): Response
     {
         $db   = Database::connect();
-        $stmt = $db->prepare('SELECT * FROM items WHERE item_id = ?');
+        $stmt = $db->prepare(
+            'SELECT i.*, u.email AS posted_by_email, u.name AS posted_by_name
+             FROM items i
+             JOIN users u ON i.posted_by = u.user_id
+             WHERE i.item_id = ?'
+        );
         $stmt->execute([(int) $args['id']]);
         $item = $stmt->fetch();
 
