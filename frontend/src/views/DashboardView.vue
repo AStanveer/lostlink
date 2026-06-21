@@ -210,7 +210,7 @@ const pendingClaimsCount = computed(() => {
 // Filter matches to only show pairs where the lost item belongs to this user
 const myMatches = computed(() => {
   const userId = auth.user?.id
-  return allMatches.value.filter(m => m.lost_item.posted_by === userId)
+  return allMatches.value.filter(m => Number(m.lost_item.posted_by) === Number(userId))
 })
 
 onMounted(async () => {
@@ -240,9 +240,10 @@ async function fetchMatches() {
   loadingMatches.value = true
   try {
     const res = await api.get('/matches')
-    allMatches.value = res.data
+    allMatches.value = res.data.matches || []  
   } catch (e) {
     showToast('Failed to load matches', 'error')
+    allMatches.value = []
   } finally {
     loadingMatches.value = false
   }
