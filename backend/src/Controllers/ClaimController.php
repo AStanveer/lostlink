@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ClaimController
 {
+    // POST /claims (protected) — a user claims a found item belongs to them.
     public function create(Request $request, Response $response): Response
     {
         $user = $request->getAttribute('user');
@@ -21,7 +22,8 @@ class ClaimController
 
         $db = Database::connect();
 
-        // Prevent claiming your own item
+        // Business rule, not just auth: you can't claim something you
+        // posted yourself, even though you're a fully authenticated user.
         $stmt = $db->prepare('SELECT posted_by, title FROM items WHERE item_id = ?');
         $stmt->execute([(int) $data['item_id']]);
         $item = $stmt->fetch();
@@ -70,7 +72,8 @@ class ClaimController
         return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
     }
 
-    // GET /claims/item/{itemId} — item owner fetches claims on their item
+    // GET /claims/item/{itemId} (protected) — item owner reviews who's
+    // claiming their found item. 
     public function getByItem(Request $request, Response $response, array $args): Response
     {
         $user   = $request->getAttribute('user');
@@ -93,6 +96,8 @@ class ClaimController
             return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
         }
 
+        // JOIN to users so the owner sees WHO is claiming (name/email), not
+        // just an opaque claimed_by id.
         $stmt = $db->prepare(
             'SELECT cr.*, u.email AS claimant_email, u.name AS claimant_name
              FROM claim_requests cr
@@ -108,7 +113,9 @@ class ClaimController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    // PUT /claims/{id} — item owner approves or rejects a claim
+    // PUT /claims/{id} (protected) — item owner approves or rejects a claim.
+    // Only "approved"/"rejected" are accepted here — "pending" and
+    // "received" are set by other parts of the flow, not chosen directly.
     public function updateStatus(Request $request, Response $response, array $args): Response
     {
         $user      = $request->getAttribute('user');
@@ -138,6 +145,9 @@ class ClaimController
             return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
         }
 
+        // Same ownership-check pattern as ItemController::update/delete —
+        // only the person who posted the FOUND item can approve/reject
+        // claims against it, not just any logged-in user.
         if ($row['posted_by'] !== $user->sub) {
             $response->getBody()->write(json_encode(['error' => 'Forbidden']));
             return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
@@ -147,8 +157,10 @@ class ClaimController
         $db->prepare('UPDATE claim_requests SET status = ? WHERE request_id = ?')
            ->execute([$newStatus, $claimId]);
 
-        // If approved, mark item as claimed and reject all other pending claims
-        // If approved, reject all other pending claims on the same item
+        // Business rule: once one claim on an item is approved, every other
+        // still-pending claim on the SAME item is auto-rejected — an item
+        // can only be handed to one person, so there's no reason to leave
+        // the others hanging.
         if ($newStatus === 'approved') {
             $db->prepare(
                 'UPDATE claim_requests SET status = ? WHERE item_id = ? AND request_id != ? AND status = ?'
@@ -166,7 +178,9 @@ class ClaimController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    // POST /claims/{id}/received — claimant confirms they got the item
+    // POST /claims/{id}/received (protected) — the final state transition:
+    // the claimant (not the item owner this time — ownership check below
+    // is flipped accordingly) confirms they actually got the item back.
     public function markReceived(Request $request, Response $response, array $args): Response
     {
         $user    = $request->getAttribute('user');
@@ -187,6 +201,8 @@ class ClaimController
             return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
         }
 
+        // Can't mark something received if it was never approved — guards
+        // against skipping straight from "pending" to "received".
         if ($claim['status'] !== 'approved') {
             $response->getBody()->write(json_encode(['error' => 'Claim is not approved yet']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
@@ -196,7 +212,9 @@ class ClaimController
         $db->prepare('UPDATE items SET status = ? WHERE item_id = ?')
         ->execute(['claimed', $claim['item_id']]);
 
-        // Mark the linked lost item as claimed if provided
+        // If this claim was linked to one of the claimant's own lost reports
+        // (lost_item_id), close that loop too — both sides of the match
+        // flip to "claimed" together.
         if (!empty($claim['lost_item_id'])) {
             $db->prepare('UPDATE items SET status = ? WHERE item_id = ? AND posted_by = ?')
             ->execute(['claimed', $claim['lost_item_id'], $user->sub]);

@@ -1,6 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/store/authStore'
 
+// This is the SPA half of route protection. Every
+// route below declares meta.requiresAuth or meta.guestOnly; the actual
+// enforcement happens once, in the single router.beforeEach guard at the
+// bottom of this file — individual views never need to check auth.user
+// themselves to decide whether to render. 
 const routes = [
   {
     path: '/',
@@ -56,12 +61,16 @@ const router = createRouter({
   routes
 })
 
+// Runs before EVERY navigation, client-side route or not.
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
+  // Protected page (Dashboard, Report, Profile, etc.) + no token -> bounce
+  // to Login instead of ever rendering the page.
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return next({ name: 'Login' })
   }
+  // Login/Register pages don't make sense once you're already signed in.
   if (to.meta.guestOnly && auth.isLoggedIn) {
     return next({ name: 'Home' })
   }

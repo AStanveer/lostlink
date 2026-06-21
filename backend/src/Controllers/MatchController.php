@@ -7,9 +7,14 @@ use App\Config\Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+// This is the "Smart Matching" feature — a weighted
+// scoring algorithm that compares every active lost item against every
+// active found item and surfaces the pairs that are likely the same
+// physical object. 
 class MatchController
 {
-    // Weight configuration for different match criteria
+    // Each signal below contributes points if it matches; a pair only shows
+    // up once its total crosses the threshold checked in index() (>= 18).
     private const WEIGHTS = [
         'exact_category' => 10,
         'similar_category' => 5,
@@ -33,24 +38,28 @@ class MatchController
         'bags' => ['backpack', 'handbag', 'tote', 'sling bag', 'luggage', 'suitcase'],
     ];
 
+    // GET /matches (protected) — brute-force compares every active lost
+    // item against every active found item (O(n*m), fine at this scale)
+    // and returns the ranked pairs. The frontend Dashboard then filters
+    // this down to "matches where the lost item is mine" client-side.
     public function index(Request $request, Response $response): Response
     {
         $db = Database::connect();
         $params = $request->getQueryParams();
-        
-        // Get date range filter 
+
+        // Get date range filter
         $daysLimit = isset($params['days']) ? (int)$params['days'] : 0;
-        
+
         // Fetch active lost and found items with date filter
         $lostQuery = "SELECT * FROM items WHERE report_type = 'lost' AND status = 'active'";
         $foundQuery = "SELECT * FROM items WHERE report_type = 'found' AND status = 'active'";
-        
+
         if ($daysLimit > 0) {
             $dateFilter = " AND date >= DATE_SUB(NOW(), INTERVAL {$daysLimit} DAY)";
             $lostQuery .= $dateFilter;
             $foundQuery .= $dateFilter;
         }
-        
+
         $lost = $db->query($lostQuery)->fetchAll();
         $found = $db->query($foundQuery)->fetchAll();
 
@@ -67,8 +76,11 @@ class MatchController
         foreach ($lost as $lostItem) {
             foreach ($found as $foundItem) {
                 $score = $this->calculateMatchScore($lostItem, $foundItem);
-                
-                // Only include matches above threshold
+
+                // Only include matches above threshold — this 18-point cutoff
+                // is the same one notifyMatchesForNewItem() uses, so a pair
+                // either shows up in BOTH the Matches tab and a notification,
+                // or in neither.
                 if ($score >= 18) {
                     $matches[] = [
                         'score' => $score,
@@ -126,21 +138,25 @@ class MatchController
         }
     }
 
+    // location and category are treated as hard GATES,
+    // not just weighted signals — if either comes back 0 (no overlap at
+    // all), the function bails immediately and the pair is rejected
+    // outright, regardless of how similar the title/description text is.
     private function calculateMatchScore(array $lost, array $found): float
     {
         $score = 0;
         $locationScore = $this->matchLocations($lost['location'], $found['location']);
-        if ($locationScore === 0.0) return 0;
+        if ($locationScore === 0.0) return 0; // gate #1: no location overlap at all -> reject
 
         $score = $locationScore;
 
-   
         $categoryScore = $this->matchCategories($lost['category'], $found['category']);
-        if ($categoryScore === 0.0) return 0;
+        if ($categoryScore === 0.0) return 0; // gate #2: no category overlap at all -> reject
 
         $score = $locationScore + $categoryScore;
 
-    
+        // From here on, every signal just adds points — none of these alone
+        // can reject the pair now that both gates above have passed.
 
         // 3. Title matching
         $titleScore = $this->matchTitles($lost['title'], $found['title']);

@@ -9,6 +9,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class UserController
 {
+    // PUT /users/{id} (protected) — self-service profile editing.
+    // This is the same ownership pattern as items/claims
+    // — a valid JWT just proves who you are, the explicit id check below is
+    // what stops user A from editing user B's profile by changing the URL.
     public function update(Request $request, Response $response, array $args): Response
     {
         $authUser = $request->getAttribute('user');
@@ -43,6 +47,9 @@ class UserController
             return $response->withStatus(409)->withHeader('Content-Type', 'application/json');
         }
 
+        // Password change is optional on this endpoint — name/email can be
+        // saved on their own. new_password only being present is what
+        // switches this into "also change the password" mode.
         $newPassword = $data['new_password'] ?? '';
 
         if ($newPassword !== '') {
@@ -52,6 +59,10 @@ class UserController
             $stmt->execute([$userId]);
             $row = $stmt->fetch();
 
+            // Security highlight: even though the user is already
+            // authenticated via JWT, changing the password additionally
+            // requires re-proving the CURRENT password. A stolen/forgotten
+            // unlocked session can't hijack the account by silently swapping the password.
             if (!$row || !password_verify($currentPassword, $row['password'])) {
                 $response->getBody()->write(json_encode(['error' => 'Current password is incorrect']));
                 return $response->withStatus(401)->withHeader('Content-Type', 'application/json');

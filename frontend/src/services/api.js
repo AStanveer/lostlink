@@ -1,5 +1,9 @@
 import axios from 'axios'
 
+// Every API call in the app goes through this one
+// axios instance, which is what makes the two interceptors below work
+// globally instead of having to be repeated at every call site.
+
 const api = axios.create({
   baseURL: '/api',
   headers: {
@@ -7,7 +11,9 @@ const api = axios.create({
   }
 })
 
-// Attach JWT to every request if present
+// This is the OTHER half of the JWT flow. Every outgoing request gets the token
+// attached here automatically — controllers on the backend then read it
+// back via JwtMiddleware. No component ever manually sets this header.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {

@@ -7,8 +7,15 @@ use App\Config\Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+// This controller is the full CRUD demo for items —
+// index/show (GET) are public, create/update/delete require a JWT and are
+// wired up in index.php's protected group.
 class ItemController
 {
+    // GET /items — builds the WHERE clause dynamically based on whichever
+    // query params were sent (?q=&category=&location=&type=), but every
+    // value is still passed through as a bound parameter, never concatenated
+    // into the SQL string directly — that's what keeps free-text search safe.
     public function index(Request $request, Response $response): Response
     {
         $db     = Database::connect();
@@ -44,6 +51,8 @@ class ItemController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    // GET /items/{id} — JOINs items to users so the response includes who
+    // posted it (name/email), not just the raw posted_by foreign key id.
     public function show(Request $request, Response $response, array $args): Response
     {
         $db   = Database::connect();
@@ -65,10 +74,15 @@ class ItemController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    // POST /items (protected) — the "Create" in CRUD. $user comes from
+    // JwtMiddleware (see that file), not from the request body, so a caller
+    // can never post an item "as" someone else.
     public function create(Request $request, Response $response): Response
     {
         $data = $request->getParsedBody();
 
+        // Required-field validation — reject early with 400 before touching
+        // the database or the filesystem.
         $required = ['title', 'description', 'category', 'location', 'date', 'report_type'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
@@ -79,6 +93,9 @@ class ItemController
 
         $user = $request->getAttribute('user');
 
+        // Optional photo: decoded from base64 
+        // written to disk; only the relative path is stored in
+        // the DB, the actual bytes live under public/uploads/.
         $imagePath = null;
         if (!empty($data['image'])) {
             $uploadsDir = __DIR__ . '/../../public/uploads/';
@@ -109,6 +126,10 @@ class ItemController
 
         $id = $db->lastInsertId();
 
+        // Bonus feature hook: as soon as this item exists, check it against
+        // every active opposite-type item (lost vs found) using the same
+        // scoring logic the Matches tab uses, and notify the lost item's
+        // owner immediately if a likely match shows up. See MatchController.
         (new MatchController())->notifyMatchesForNewItem([
             'item_id'     => $id,
             'title'       => $data['title'],
@@ -125,6 +146,7 @@ class ItemController
         return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
     }
 
+    // PUT /items/{id} (protected) — the "Update" in CRUD.
     public function update(Request $request, Response $response, array $args): Response
     {
         $user   = $request->getAttribute('user');
@@ -141,6 +163,8 @@ class ItemController
             return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
         }
 
+        // Partial update: any field not sent falls back to its current
+        // value via ??, so the frontend can send just the fields it changed.
         $db->prepare(
             'UPDATE items SET title=?, description=?, category=?, location=?, date=?, status=? WHERE item_id=?'
         )->execute([
@@ -157,6 +181,8 @@ class ItemController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    // DELETE /items/{id} (protected) — the "Delete" in CRUD, same ownership
+    // check pattern as update() above.
     public function delete(Request $request, Response $response, array $args): Response
     {
         $user   = $request->getAttribute('user');
