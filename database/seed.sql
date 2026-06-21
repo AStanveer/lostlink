@@ -3,9 +3,9 @@ USE lostlink;
 
 -- Test users (password: 'password123' for all three)
 INSERT INTO users (email, password) VALUES
-('alice@utm.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('bob@utm.my',   '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('carol@utm.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+('alice@utm.my', '$2y$12$iuICtK/1xmzTZpC8TiP0K.uwP.ImKUuR5axsb6qwUurGTjav8VhSC'),
+('bob@utm.my',   '$2y$12$iuICtK/1xmzTZpC8TiP0K.uwP.ImKUuR5axsb6qwUurGTjav8VhSC'),
+('carol@utm.my', '$2y$12$iuICtK/1xmzTZpC8TiP0K.uwP.ImKUuR5axsb6qwUurGTjav8VhSC');
 
 -- Sample items
 INSERT INTO items (title, description, category, location, date, report_type, status, posted_by) VALUES

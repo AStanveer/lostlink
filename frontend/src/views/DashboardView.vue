@@ -47,6 +47,7 @@
             <div class="report-meta">
               <span class="badge" :class="item.report_type">{{ item.report_type }}</span>
               <span class="badge status" :class="item.status">{{ item.status }}</span>
+              <button class="btn-delete" @click="deleteReport(item.item_id)" title="Delete this report">🗑 Delete</button>
             </div>
             <h3>{{ item.title }}</h3>
             <p class="meta-row">📍 {{ item.location }} &nbsp;·&nbsp; 🗂 {{ item.category }} &nbsp;·&nbsp; 📅 {{ formatDate(item.date) }}</p>
@@ -291,6 +292,17 @@ async function markReceived(claimId) {
   }
 }
 
+async function deleteReport(itemId) {
+  if (!confirm('Delete this report? This cannot be undone.')) return
+  try {
+    await api.delete(`/items/${itemId}`)
+    reports.value = reports.value.filter(r => r.item_id !== itemId)
+    showToast('Report deleted', 'success')
+  } catch (e) {
+    showToast(e.response?.data?.error || 'Failed to delete report', 'error')
+  }
+}
+
 function formatDate(d) {
   return d ? new Date(d).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 }
@@ -377,7 +389,18 @@ function showToast(message, type = 'success') {
   padding: 1.25rem 1.5rem;
   background: white;
 }
-.report-meta { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.report-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.btn-delete {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-delete:hover { color: #CC0001; }
 .report-card h3 { font-size: 1.05rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.35rem; }
 .meta-row { font-size: 0.85rem; color: #666; }
 
