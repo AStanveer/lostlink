@@ -21,6 +21,16 @@ class AuthController
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response->getBody()->write(json_encode(['error' => 'Invalid email address']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
+
+        if (strlen($password) < 8) {
+            $response->getBody()->write(json_encode(['error' => 'Password must be at least 8 characters']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
+
         $db   = Database::connect();
         $stmt = $db->prepare('SELECT user_id FROM users WHERE email = ?');
         $stmt->execute([$email]);

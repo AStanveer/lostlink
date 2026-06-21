@@ -6,7 +6,7 @@ USE lostlink;
 
 CREATE TABLE IF NOT EXISTS users (
     user_id  INT          NOT NULL AUTO_INCREMENT,
-    email    VARCHAR(255) NOT NULL UNIQUE,
+    email    VARCHAR(191) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     PRIMARY KEY (user_id)
 );
@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS claim_requests (
     status ENUM('pending', 'approved', 'rejected', 'received') NOT NULL DEFAULT 'pending',
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (request_id),
-    CONSTRAINT fk_claim_item FOREIGN KEY (item_id)    REFERENCES items (item_id) ON DELETE CASCADE,
-    CONSTRAINT fk_claim_user FOREIGN KEY (claimed_by) REFERENCES users (user_id) ON DELETE CASCADE
+    CONSTRAINT fk_claim_item      FOREIGN KEY (item_id)      REFERENCES items (item_id) ON DELETE CASCADE,
+    CONSTRAINT fk_claim_user      FOREIGN KEY (claimed_by)   REFERENCES users (user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_claim_lost_item FOREIGN KEY (lost_item_id) REFERENCES items (item_id) ON DELETE SET NULL
 );

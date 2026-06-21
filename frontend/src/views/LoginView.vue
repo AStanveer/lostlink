@@ -71,8 +71,6 @@ async function handleLogin() {
   error.value = ''
   loading.value = true
   try {
-    console.log(email.value, password.value);
-
     await auth.login(email.value, password.value)
     await router.push('/')
   } catch (err) {

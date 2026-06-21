@@ -38,7 +38,7 @@
           </div>
           <div class="field">
             <label>Password</label>
-            <input v-model="password" type="password" placeholder="Create a password" required />
+            <input v-model="password" type="password" placeholder="At least 8 characters" required minlength="8" />
           </div>
           <div class="field">
             <label>Confirm Password</label>

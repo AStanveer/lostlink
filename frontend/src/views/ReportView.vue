@@ -244,28 +244,9 @@ function rgbToColorName(r, g, b) {
 async function analyzeWithGoogleVision(file) {
   const base64 = await toBase64(file)
 
-  const res = await fetch(
-    `https://vision.googleapis.com/v1/images:annotate?key=${GV_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requests: [{
-          image: { content: base64 },
-          features: [
-            { type: 'OBJECT_LOCALIZATION', maxResults: 5 },
-            { type: 'LABEL_DETECTION',     maxResults: 20 },
-            { type: 'IMAGE_PROPERTIES' }
-          ]
-        }]
-      })
-    }
-  )
+  const { data } = await api.post('/vision/analyze', { image: base64 })
 
-  const data = await res.json()
-  console.log('Vision response:', data)
-
-  if (data.error) throw new Error(data.error.message)
+  if (data.error) throw new Error(data.error.message || data.error)
 
   const resp = data.responses?.[0] ?? {}
 

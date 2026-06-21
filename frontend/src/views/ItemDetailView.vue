@@ -191,11 +191,11 @@ const {
 onMounted(async () => {
   try {
     const res = await api.get(`/items/${route.params.id}`)
-    itemStore.item.value = res.data
+    itemStore.item = res.data
   } catch (e) {
-    itemStore.item.value = null
+    itemStore.item = null
   } finally {
-    itemStore.loading.value = false
+    itemStore.loading = false
   }
 })
 
@@ -249,9 +249,9 @@ function formatDate(d) {
 }
 
 function showToast(message, type = 'success') {
-  itemStore.toast.value = {message, type}
+  itemStore.toast = {message, type}
   setTimeout(() => {
-    itemStore.toast.value = {message: '', type: ''}
+    itemStore.toast = {message: '', type: ''}
   }, 3500)
 }
 </script>

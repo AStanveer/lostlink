@@ -1,10 +1,11 @@
 -- Seed data for local development/testing
 USE lostlink;
 
--- Test users (password: 'password123' for both)
+-- Test users (password: 'password123' for all three)
 INSERT INTO users (email, password) VALUES
 ('alice@utm.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('bob@utm.my',   '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+('bob@utm.my',   '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+('carol@utm.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 
 -- Sample items
 INSERT INTO items (title, description, category, location, date, report_type, status, posted_by) VALUES

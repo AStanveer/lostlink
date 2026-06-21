@@ -46,6 +46,7 @@ $app->options('/{routes:.+}', function ($request, $response) {
 $app->get('/items', ItemController::class . ':index');
 $app->get('/items/{id}', ItemController::class . ':show');
 $app->post('/analyze', AnalyzeController::class . ':analyze');
+$app->post('/vision/analyze', AnalyzeController::class . ':vision');
 
 // Protected routes (JWT required)
 $app->group('', function (RouteCollectorProxy $group) {
