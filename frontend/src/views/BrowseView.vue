@@ -33,6 +33,15 @@
         <option value="">All categories</option>
         <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
       </select>
+
+      <select
+          v-model="statusFilter"
+          class="bg-gray-100 rounded-xl px-4 py-2.5 focus:bg-white focus:outline-2 focus:outline-[var(--primary)]"
+      >
+        <option value="">All statuses</option>
+        <option value="active">Unclaimed</option>
+        <option value="claimed">Claimed</option>
+      </select>
     </div>
 
     <p v-if="data && !isLoading" class="text-sm text-gray-500 mb-4">
@@ -74,6 +83,7 @@ const {data, isLoading, error} = useItems();
 const searchTerm = ref("");
 const typeFilter = ref("");
 const categoryFilter = ref("");
+const statusFilter = ref("");
 
 const typeOptions = [
   {label: 'All', value: ''},
@@ -93,6 +103,7 @@ const filteredItems = computed(() => {
   return data.value.filter(item => {
     if (typeFilter.value && item.report_type !== typeFilter.value) return false
     if (categoryFilter.value && item.category !== categoryFilter.value) return false
+    if (statusFilter.value && item.status !== statusFilter.value) return false
     if (!clean) return true
     return [item.title, item.description, item.location]
         .some(field => field?.toLowerCase().includes(clean))

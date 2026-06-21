@@ -84,7 +84,7 @@
           <!-- Lost item, own report -->
           <div v-else-if="item.report_type === 'lost' && isOwnItem">
             <p class="action-hint">This is your lost item report. Check for matches in your Dashboard.</p>
-            <RouterLink to="/dashboard" class="btn btn-outline full-width">View Matches</RouterLink>
+            <RouterLink to="/dashboard?tab=matches" class="btn btn-outline full-width">View Matches</RouterLink>
           </div>
         </div>
       </div>

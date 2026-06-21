@@ -177,11 +177,18 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import api from '@/services/api'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
+const route = useRoute()
 
 const auth = useAuthStore()
-const activeTab = ref('reports')
+const tabs = [
+  { key: 'reports', label: 'My Reports' },
+  { key: 'claims',  label: 'My Claims'  },
+  { key: 'matches', label: 'Matches'    },
+]
+const validTabKeys = tabs.map(t => t.key)
+const activeTab = ref(validTabKeys.includes(route.query.tab) ? route.query.tab : 'reports')
 const loading = ref(true)
 const loadingMatches = ref(false)
 const loadingClaims = ref(false)
@@ -192,12 +199,6 @@ const allMatches = ref([])
 const incomingClaims = ref([])
 const expandedItem = ref(null)
 const toast = ref({ message: '', type: '' })
-
-const tabs = [
-  { key: 'reports', label: 'My Reports' },
-  { key: 'claims',  label: 'My Claims'  },
-  { key: 'matches', label: 'Matches'    },
-]
 watch(activeTab, async (newTab) => {
   if (newTab === 'reports') await fetchDashboard()
 })

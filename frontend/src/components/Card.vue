@@ -27,6 +27,7 @@ const activeBadge = computed(() => {
 })
 
 const isLost = computed(() => props.item.report_type === 'lost')
+const isClaimed = computed(() => props.item.status === 'claimed')
 
 const postedAgo = computed(() => {
   const diffMs = Date.now() - new Date(props.item.date).getTime()
@@ -49,12 +50,23 @@ const postedAgo = computed(() => {
       class="group flex flex-col bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
   >
     <div class="relative">
-      <img :src="item.image_path ? `/api${item.image_path}` : placeholder" class="w-full h-48 object-cover object-center" alt="Posted image">
+      <img
+          :src="item.image_path ? `/api${item.image_path}` : placeholder"
+          class="w-full h-48 object-cover object-center"
+          :class="isClaimed ? 'grayscale opacity-60' : ''"
+          alt="Posted image"
+      >
       <span
           class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-sm"
           :class="isLost ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'bg-blue-50 text-blue-700'"
       >
         {{ isLost ? 'Lost' : 'Found' }}
+      </span>
+      <span
+          v-if="isClaimed"
+          class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-sm bg-gray-800/90 text-white"
+      >
+        ✓ Claimed
       </span>
     </div>
     <div class="flex flex-col p-4 gap-2 flex-1">
