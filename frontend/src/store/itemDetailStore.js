@@ -35,13 +35,13 @@ export const useItemDetailStore = defineStore("item", () => {
     const claimForm = ref({description: ''});
 
     const lostItemId = computed(() => route.query.lost_item_id || null)
-    const isOwnItem = computed(() => !!item.value && auth.user?.id === item.value.posted_by)
+    const isOwnItem = computed(() => auth.user?.id === item.value?.posted_by)
     const canClaim  = computed(() =>
         !!item.value &&
         auth.isLoggedIn &&
         !isOwnItem.value &&
-        item.value.report_type === 'found' &&
-        item.value.status === 'active'
+        item.value?.report_type === 'found' &&
+        item.value?.status === 'active'
     )
 
     return {
