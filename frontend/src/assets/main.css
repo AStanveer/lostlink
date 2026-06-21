@@ -141,6 +141,111 @@ h1, h2, h3, h4 {
   color: var(--primary-dark);
 }
 
+/* ── Notifications ────────────────────────────────── */
+.notif-wrap {
+  position: relative;
+  margin-left: 1.75rem;
+}
+
+.notif-bell {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 1.05rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -7px;
+  right: -10px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+}
+
+.notif-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.notif-markall {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notif-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.notif-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--bg); }
+.notif-item::after { display: none; }
+
+.notif-item.unread {
+  background: var(--primary-50);
+}
+
+.notif-message {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 0.2rem;
+  line-height: 1.4;
+}
+
+.notif-time {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+}
+
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -195,6 +300,17 @@ h1, h2, h3, h4 {
 
   .nav-links a::after {
     display: none;
+  }
+
+  .notif-wrap {
+    margin-left: 0;
+    padding: 0.65rem 0;
+  }
+
+  .notif-panel {
+    right: auto;
+    left: 0;
+    width: min(320px, 90vw);
   }
 }
 

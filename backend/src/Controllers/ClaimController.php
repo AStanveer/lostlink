@@ -22,7 +22,7 @@ class ClaimController
         $db = Database::connect();
 
         // Prevent claiming your own item
-        $stmt = $db->prepare('SELECT posted_by FROM items WHERE item_id = ?');
+        $stmt = $db->prepare('SELECT posted_by, title FROM items WHERE item_id = ?');
         $stmt->execute([(int) $data['item_id']]);
         $item = $stmt->fetch();
 
@@ -58,6 +58,13 @@ class ClaimController
             !empty($data['lost_item_id']) ? (int) $data['lost_item_id'] : null,
             'pending',
         ]);
+
+        NotificationController::notify(
+            (int) $item['posted_by'],
+            'claim_submitted',
+            'Someone submitted a claim for your item "' . $item['title'] . '".',
+            '/dashboard?tab=reports'
+        );
 
         $response->getBody()->write(json_encode(['message' => 'Claim submitted']));
         return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
@@ -118,7 +125,7 @@ class ClaimController
 
         // Fetch the claim and verify the authenticated user owns the item
         $stmt = $db->prepare(
-            'SELECT cr.item_id, i.posted_by
+            'SELECT cr.item_id, cr.claimed_by, i.posted_by, i.title
              FROM claim_requests cr
              JOIN items i ON cr.item_id = i.item_id
              WHERE cr.request_id = ?'
@@ -147,6 +154,13 @@ class ClaimController
                 'UPDATE claim_requests SET status = ? WHERE item_id = ? AND request_id != ? AND status = ?'
             )->execute(['rejected', $row['item_id'], $claimId, 'pending']);
         }
+
+        NotificationController::notify(
+            (int) $row['claimed_by'],
+            'claim_' . $newStatus,
+            'Your claim for "' . $row['title'] . '" was ' . $newStatus . '.',
+            '/dashboard?tab=claims'
+        );
 
         $response->getBody()->write(json_encode(['message' => 'Claim ' . $newStatus]));
         return $response->withHeader('Content-Type', 'application/json');
@@ -191,6 +205,19 @@ class ClaimController
         // Update claim status to received
         $db->prepare('UPDATE claim_requests SET status = ? WHERE request_id = ?')
         ->execute(['received', $claimId]);
+
+        $itemStmt = $db->prepare('SELECT title, posted_by FROM items WHERE item_id = ?');
+        $itemStmt->execute([$claim['item_id']]);
+        $foundItem = $itemStmt->fetch();
+
+        if ($foundItem) {
+            NotificationController::notify(
+                (int) $foundItem['posted_by'],
+                'item_received',
+                'The claimant confirmed they received "' . $foundItem['title'] . '".',
+                '/dashboard?tab=reports'
+            );
+        }
 
         $response->getBody()->write(json_encode(['message' => 'Item marked as received']));
         return $response->withHeader('Content-Type', 'application/json');

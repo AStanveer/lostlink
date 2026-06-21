@@ -96,6 +96,36 @@ class MatchController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    // Called right after a new item is created — checks it against active
+    // opposite-type items and notifies the lost item's owner of any match.
+    public function notifyMatchesForNewItem(array $newItem): void
+    {
+        $db = Database::connect();
+        $oppositeType = $newItem['report_type'] === 'lost' ? 'found' : 'lost';
+
+        $stmt = $db->prepare(
+            "SELECT * FROM items WHERE report_type = ? AND status = 'active' AND posted_by != ?"
+        );
+        $stmt->execute([$oppositeType, $newItem['posted_by']]);
+        $candidates = $stmt->fetchAll();
+
+        foreach ($candidates as $candidate) {
+            $lost  = $newItem['report_type'] === 'lost' ? $newItem : $candidate;
+            $found = $newItem['report_type'] === 'found' ? $newItem : $candidate;
+
+            $score = $this->calculateMatchScore($lost, $found);
+
+            if ($score >= 18) {
+                NotificationController::notify(
+                    (int) $lost['posted_by'],
+                    'item_match',
+                    'A possible match was found for your lost report "' . $lost['title'] . '": "' . $found['title'] . '".',
+                    '/dashboard?tab=matches'
+                );
+            }
+        }
+    }
+
     private function calculateMatchScore(array $lost, array $found): float
     {
         $score = 0;

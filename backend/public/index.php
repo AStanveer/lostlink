@@ -9,6 +9,8 @@ use App\Controllers\ClaimController;
 use App\Controllers\DashboardController;
 use App\Controllers\ItemController;
 use App\Controllers\MatchController;
+use App\Controllers\NotificationController;
+use App\Controllers\UserController;
 use App\Middleware\JwtMiddleware;
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
@@ -66,6 +68,14 @@ $app->group('', function (RouteCollectorProxy $group) {
 
     // Dashboard
     $group->get('/dashboard/{userId}', DashboardController::class . ':index');
+
+    // Notifications
+    $group->get('/notifications', NotificationController::class . ':index');
+    $group->put('/notifications/{id}/read', NotificationController::class . ':markRead');
+    $group->put('/notifications/read-all', NotificationController::class . ':markAllRead');
+
+    // User profile
+    $group->put('/users/{id}', UserController::class . ':update');
 
 })->add(JwtMiddleware::class);
 

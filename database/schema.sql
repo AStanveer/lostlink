@@ -41,3 +41,15 @@ CREATE TABLE IF NOT EXISTS claim_requests (
     CONSTRAINT fk_claim_user      FOREIGN KEY (claimed_by)   REFERENCES users (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_claim_lost_item FOREIGN KEY (lost_item_id) REFERENCES items (item_id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS notifications (
+    notification_id INT          NOT NULL AUTO_INCREMENT,
+    user_id          INT          NOT NULL,
+    type             VARCHAR(50)  NOT NULL,
+    message          TEXT         NOT NULL,
+    link             VARCHAR(255) DEFAULT NULL,
+    is_read          TINYINT(1)   NOT NULL DEFAULT 0,
+    created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (notification_id),
+    CONSTRAINT fk_notification_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);

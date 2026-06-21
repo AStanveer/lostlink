@@ -108,6 +108,19 @@ class ItemController
         ]);
 
         $id = $db->lastInsertId();
+
+        (new MatchController())->notifyMatchesForNewItem([
+            'item_id'     => $id,
+            'title'       => $data['title'],
+            'description' => $data['description'],
+            'category'    => $data['category'],
+            'location'    => $data['location'],
+            'date'        => $data['date'],
+            'report_type' => $data['report_type'],
+            'status'      => 'active',
+            'posted_by'   => $user->sub,
+        ]);
+
         $response->getBody()->write(json_encode(['message' => 'Item reported', 'item_id' => $id]));
         return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
     }

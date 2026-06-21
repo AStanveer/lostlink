@@ -16,11 +16,13 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle 401 globally
+// Handle 401 globally — but not for the login request itself, where a 401
+// just means "wrong credentials" and should be shown inline, not redirected.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLoginRequest = error.config?.url?.includes('/login')
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
