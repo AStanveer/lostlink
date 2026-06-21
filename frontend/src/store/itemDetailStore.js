@@ -1,7 +1,7 @@
 import {defineStore} from "pinia";
 import {useRoute} from "vue-router";
 import {useAuthStore} from "@/store/authStore";
-import {computed, ref, Ref} from "vue";
+import {computed, ref} from "vue";
 
 
 export const useItemDetailStore = defineStore("item", () => {
@@ -35,12 +35,12 @@ export const useItemDetailStore = defineStore("item", () => {
     const claimForm = ref({description: ''});
 
     const lostItemId = computed(() => route.query.lost_item_id || null)
-    const isOwnItem = computed(() => auth.user?.id === item.value.posted_by)
+    const isOwnItem = computed(() => auth.user?.id === item.value?.posted_by)
     const canClaim  = computed(() =>
         auth.isLoggedIn &&
         !isOwnItem.value &&
-        item.value.report_type === 'found' &&
-        item.value.status === 'active'
+        item.value?.report_type === 'found' &&
+        item.value?.status === 'active'
     )
 
     return {

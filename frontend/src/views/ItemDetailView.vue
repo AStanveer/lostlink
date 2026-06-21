@@ -191,11 +191,11 @@ const {
 onMounted(async () => {
   try {
     const res = await api.get(`/items/${route.params.id}`)
-    itemStore.item.value = res.data
+    item.value = res.data
   } catch (e) {
-    itemStore.item.value = null
+    item.value = null
   } finally {
-    itemStore.loading.value = false
+    loading.value = false
   }
 })
 
@@ -219,7 +219,7 @@ async function submitClaim() {
   claimError.value = ''
   claimSuccess.value = ''
 
-  if (claimForm.value.description.trim()) {
+  if (!claimForm.value.description.trim()) {
     claimErrors.value.description = 'Please describe why this item belongs to you.'
     return
   }
